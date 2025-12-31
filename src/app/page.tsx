@@ -6,6 +6,7 @@ import { Loader2, Sparkles, Target, TrendingUp, CheckCircle, Clock, Filter, Flam
 import { toast } from 'sonner'
 import { User } from '@supabase/supabase-js'
 import { goalsApi, authApi, Goal } from '@/lib/supabase'
+import { initAudio } from '@/lib/sounds'
 import { AuthCard } from '@/components/AuthCard'
 import { Header } from '@/components/Header'
 import { BentoGrid } from '@/components/BentoGrid'
@@ -48,6 +49,15 @@ export default function Home() {
 
   // Auth state listener
   useEffect(() => {
+    // Initialize audio on first interaction (for iOS)
+    const handleFirstInteraction = () => {
+      initAudio()
+      document.removeEventListener('touchstart', handleFirstInteraction)
+      document.removeEventListener('click', handleFirstInteraction)
+    }
+    document.addEventListener('touchstart', handleFirstInteraction, { once: true })
+    document.addEventListener('click', handleFirstInteraction, { once: true })
+
     try {
       const { data: { subscription } } = authApi.onAuthStateChange((event, session) => {
         setUser(session?.user ?? null)

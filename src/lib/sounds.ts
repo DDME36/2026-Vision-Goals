@@ -7,10 +7,26 @@ function getAudioContext() {
     if (!audioContext && typeof window !== 'undefined') {
       audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
     }
+    // Resume audio context if suspended (required for iOS Safari)
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume()
+    }
     return audioContext
   } catch (e) {
     console.warn('Web Audio API not supported')
     return null
+  }
+}
+
+// Initialize audio context on first user interaction (for iOS)
+export function initAudio() {
+  try {
+    const ctx = getAudioContext()
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume()
+    }
+  } catch (e) {
+    // Silent fail
   }
 }
 

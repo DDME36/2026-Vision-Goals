@@ -356,39 +356,39 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto max-sm:pt-12">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Share2 className="w-5 h-5" />
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
             สร้าง Poster แชร์เป้าหมาย
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid md:grid-cols-2 gap-6 mt-4">
+        <div className="grid md:grid-cols-2 gap-4 sm:gap-6 mt-3 sm:mt-4">
           {/* Left: Options */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Theme Selection */}
             <div>
-              <label className="text-sm font-medium mb-3 block">เลือกธีม</label>
-              <div className="grid grid-cols-2 gap-2">
+              <label className="text-sm font-medium mb-2 sm:mb-3 block">เลือกธีม</label>
+              <div className="grid grid-cols-4 sm:grid-cols-2 gap-1.5 sm:gap-2">
                 {posterThemes.map(theme => (
                   <button
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme)}
                     className={cn(
-                      'p-3 rounded-xl border-2 transition-all text-left',
+                      'p-2 sm:p-3 rounded-xl border-2 transition-all text-left',
                       selectedTheme.id === theme.id 
                         ? 'border-primary ring-2 ring-primary/20' 
-                        : 'border-border hover:border-muted-foreground'
+                        : 'border-border'
                     )}
                   >
                     <div 
-                      className="w-full h-8 rounded-lg mb-2" 
+                      className="w-full h-6 sm:h-8 rounded-lg mb-1 sm:mb-2" 
                       style={{ 
                         background: `linear-gradient(135deg, ${theme.bgGradient.join(', ')})` 
                       }}
                     />
-                    <span className="text-sm">{theme.name}</span>
+                    <span className="text-[10px] sm:text-sm block truncate">{theme.name}</span>
                   </button>
                 ))}
               </div>
@@ -396,41 +396,41 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
 
             {/* Goal Selection */}
             <div>
-              <label className="text-sm font-medium mb-3 block">
+              <label className="text-sm font-medium mb-2 sm:mb-3 block">
                 เลือกเป้าหมาย (สูงสุด 6 รายการ)
               </label>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+              <div className="space-y-1.5 sm:space-y-2 max-h-[200px] sm:max-h-[300px] overflow-y-auto pr-1 sm:pr-2">
                 {goals.map(goal => (
                   <button
                     key={goal.id}
                     onClick={() => toggleGoal(goal.id)}
                     className={cn(
-                      'w-full p-3 rounded-xl border text-left transition-all flex items-center gap-3',
+                      'w-full p-2.5 sm:p-3 rounded-xl border text-left transition-all flex items-center gap-2 sm:gap-3',
                       selectedGoals.includes(goal.id)
                         ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-muted-foreground'
+                        : 'border-border'
                     )}
                   >
                     <div className={cn(
-                      'w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
+                      'w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
                       selectedGoals.includes(goal.id) 
                         ? 'border-primary bg-primary' 
                         : 'border-muted-foreground'
                     )}>
                       {selectedGoals.includes(goal.id) && (
-                        <Check className="w-3 h-3 text-white" />
+                        <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={cn(
-                        'font-medium truncate',
+                        'text-sm sm:text-base font-medium truncate',
                         goal.status && 'line-through text-muted-foreground'
                       )}>
                         {goal.title}
                       </p>
                     </div>
                     {goal.status && (
-                      <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] sm:text-xs text-green-600 bg-green-50 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">
                         สำเร็จ
                       </span>
                     )}
@@ -443,25 +443,25 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
             <Button 
               onClick={downloadPoster} 
               disabled={isGenerating || selectedGoals.length === 0}
-              className="w-full h-12 gap-2"
+              className="w-full h-10 sm:h-12 gap-2"
             >
               {isGenerating ? (
                 <>กำลังสร้าง...</>
               ) : (
                 <>
-                  <Download className="w-5 h-5" />
+                  <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                   ดาวน์โหลด Poster
                 </>
               )}
             </Button>
 
-            <p className="text-xs text-muted-foreground text-center">
-              ขนาด 1080x1920 px เหมาะสำหรับ Instagram/Facebook Story
+            <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
+              ขนาด 1080x1920 px เหมาะสำหรับ IG/FB Story
             </p>
           </div>
 
-          {/* Right: Preview */}
-          <div className="flex flex-col items-center">
+          {/* Right: Preview - Hidden on mobile, show after selection */}
+          <div className="hidden md:flex flex-col items-center">
             <label className="text-sm font-medium mb-3 block self-start">ตัวอย่าง</label>
             <div className="w-full max-w-[320px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl bg-muted">
               <canvas 

@@ -99,7 +99,7 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 mt-4 overflow-x-hidden">
           {/* Title */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
@@ -114,8 +114,8 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
                 setTitle(e.target.value.slice(0, TITLE_MAX_LENGTH))
                 if (titleError) setTitleError('')
               }}
-              placeholder="เช่น เรียนภาษาใหม่, ออกกำลังกายสม่ำเสมอ"
-              className={`font-display text-xl h-12 ${titleError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+              placeholder="เช่น เรียนภาษาใหม่"
+              className={`font-display text-lg sm:text-xl h-11 sm:h-12 ${titleError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
               autoFocus
               maxLength={TITLE_MAX_LENGTH}
             />
@@ -127,7 +127,7 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
           {/* Priority */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">ความสำคัญ</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               {priorities.map((p) => {
                 const Icon = p.icon
                 return (
@@ -135,16 +135,15 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
                     key={p.key}
                     type="button"
                     onClick={() => setPriority(p.key as 'high' | 'medium' | 'low')}
-                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`flex items-center justify-center gap-2 px-3 py-2.5 text-sm rounded-xl border-2 transition-all ${
+                    className={`flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm rounded-xl border-2 transition-all ${
                       priority === p.key
                         ? p.color + ' border-current font-medium'
-                        : 'bg-transparent text-muted-foreground border-border hover:border-muted-foreground'
+                        : 'bg-transparent text-muted-foreground border-border'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
-                    {p.label}
+                    <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                    <span className="truncate">{p.label}</span>
                   </motion.button>
                 )
               })}
@@ -163,7 +162,7 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
               value={description}
               onChange={(e) => setDescription(e.target.value.slice(0, DESCRIPTION_MAX_LENGTH))}
               placeholder="เพิ่มรายละเอียดเกี่ยวกับเป้าหมาย..."
-              className="flex min-h-[80px] w-full rounded-xl border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none transition-all"
+              className="flex min-h-[70px] sm:min-h-[80px] w-full rounded-xl border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none transition-all"
               maxLength={DESCRIPTION_MAX_LENGTH}
             />
           </div>
@@ -177,25 +176,24 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
               onChange={(e) => setTargetDate(e.target.value)}
               min="2026-01-01"
               max="2026-12-31"
-              className="h-11"
+              className="h-11 w-full appearance-none"
             />
           </div>
 
           {/* Category */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">หมวดหมู่</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {categories.map((cat) => (
                 <motion.button
                   key={cat.key}
                   type="button"
                   onClick={() => setCategory(cat.key)}
-                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                  className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-full border transition-colors ${
                     category === cat.key
                       ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-transparent text-muted-foreground border-border hover:border-muted-foreground'
+                      : 'bg-transparent text-muted-foreground border-border'
                   }`}
                 >
                   {cat.label}
@@ -204,11 +202,11 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+          <div className="flex justify-end gap-2 sm:gap-3 pt-4 border-t">
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="h-10 sm:h-11">
               ยกเลิก
             </Button>
-            <Button type="submit" disabled={!title.trim()} className="px-6">
+            <Button type="submit" disabled={!title.trim()} className="px-4 sm:px-6 h-10 sm:h-11">
               {goal ? 'บันทึก' : 'เพิ่มเป้าหมาย'}
             </Button>
           </div>

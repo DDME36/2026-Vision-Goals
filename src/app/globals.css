@@ -47,6 +47,11 @@
   input, select, textarea {
     font-size: 16px !important;
   }
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 44px;
+  }
   @media (min-width: 640px) {
     input, select, textarea {
       font-size: inherit !important;
