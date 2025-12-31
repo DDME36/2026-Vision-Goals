@@ -162,7 +162,7 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
               value={description}
               onChange={(e) => setDescription(e.target.value.slice(0, DESCRIPTION_MAX_LENGTH))}
               placeholder="เพิ่มรายละเอียดเกี่ยวกับเป้าหมาย..."
-              className="flex min-h-[70px] sm:min-h-[80px] w-full rounded-xl border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none transition-all"
+              className="flex min-h-[70px] sm:min-h-[80px] w-full rounded-xl border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset resize-none transition-all"
               maxLength={DESCRIPTION_MAX_LENGTH}
             />
           </div>
@@ -177,7 +177,7 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
                 onChange={(e) => setTargetDate(e.target.value)}
                 min="2026-01-01"
                 max="2026-12-31"
-                className="h-11 w-full appearance-none pr-10"
+                className="h-11 w-full appearance-none pr-10 text-center sm:text-left"
               />
               {targetDate && (
                 <button
