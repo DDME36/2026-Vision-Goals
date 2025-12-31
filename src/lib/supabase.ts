@@ -1,0 +1,166 @@
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Types
+export interface Goal {
+  id: string
+  user_id: string
+  title: string
+  description?: string
+  status: boolean
+  priority: 'high' | 'medium' | 'low'
+  position: number
+  category: string
+  target_date?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface User {
+  id: string
+  email: string
+  user_metadata?: {
+    full_name?: string
+    avatar_url?: string
+  }
+}
+
+// Goal CRUD Operations
+export const goalsApi = {
+  async getAll(userId: string): Promise<Goal[]> {
+    const { data, error } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('user_id', userId)
+      .order('position', { ascending: true })
+    
+    if (error) throw error
+    return data || []
+  },
+
+  async create(goal: Omit<Goal, 'id' | 'created_at' | 'updated_at'>): Promise<Goal> {
+    const { data, error } = await supabase
+      .from('goals')
+      .insert(goal)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  async update(id: string, updates: Partial<Goal>): Promise<Goal> {
+    const { data, error } = await supabase
+      .from('goals')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('goals')
+      .delete()
+      .eq('id', id)
+    
+    if (error) throw error
+  },
+
+  async updatePositions(goals: { id: string; position: number }[]): Promise<void> {
+    const updates = goals.map(({ id, position }) =>
+      supabase.from('goals').update({ position }).eq('id', id)
+    )
+    await Promise.all(updates)
+  }
+}
+
+// Auth Operations
+export const authApi = {
+  async signInWithGoogle() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+    if (error) throw error
+    return data
+  },
+
+  async signInWithFacebook() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'facebook',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+    if (error) throw error
+    return data
+  },
+
+  async signInWithDiscord() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'discord',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+    if (error) throw error
+    return data
+  },
+
+  async signInWithUsername(username: string, password: string) {
+    // ใช้ username เป็น fake email format
+    const fakeEmail = `${username.toLowerCase().replace(/\s+/g, '')}@local.app`
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: fakeEmail,
+      password
+    })
+    if (error) throw error
+    return data
+  },
+
+  async signUpWithUsername(username: string, password: string) {
+    const fakeEmail = `${username.toLowerCase().replace(/\s+/g, '')}@local.app`
+    const { data, error } = await supabase.auth.signUp({
+      email: fakeEmail,
+      password,
+      options: {
+        data: {
+          full_name: username
+        }
+      }
+    })
+    if (error) throw error
+    return data
+  },
+
+  async signOut() {
+    try {
+      const { error } = await supabase.auth.signOut()
+      // Ignore session missing error - user is already logged out
+      if (error && !error.message.includes('session')) throw error
+    } catch (err) {
+      // Silently handle if no session exists
+      console.log('Sign out completed')
+    }
+  },
+
+  async getSession() {
+    const { data, error } = await supabase.auth.getSession()
+    if (error) throw error
+    return data.session
+  },
+
+  onAuthStateChange(callback: (event: string, session: any) => void) {
+    return supabase.auth.onAuthStateChange(callback)
+  }
+}
