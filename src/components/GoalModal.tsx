@@ -177,7 +177,7 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
                 onChange={(e) => setTargetDate(e.target.value)}
                 min="2026-01-01"
                 max="2026-12-31"
-                className="h-11 w-full appearance-none pr-10 text-center sm:text-left"
+                className="h-11 w-full appearance-none pr-10 text-center"
               />
               {targetDate && (
                 <button
