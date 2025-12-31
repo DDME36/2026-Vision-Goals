@@ -458,9 +458,21 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
             <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
               ขนาด 1080x1920 px เหมาะสำหรับ IG/FB Story
             </p>
+
+            {/* Mobile Preview - Small */}
+            <div className="md:hidden flex justify-center">
+              <div className="w-[120px] aspect-[9/16] rounded-xl overflow-hidden shadow-lg bg-muted">
+                <canvas 
+                  ref={previewCanvasRef}
+                  width={432}
+                  height={768}
+                  className="w-full h-full"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Right: Preview - Hidden on mobile, show after selection */}
+          {/* Right: Preview - Desktop only */}
           <div className="hidden md:flex flex-col items-center">
             <label className="text-sm font-medium mb-3 block self-start">ตัวอย่าง</label>
             <div className="w-full max-w-[320px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl bg-muted">
