@@ -59,18 +59,13 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [selectedTheme, setSelectedTheme] = useState(posterThemes[0])
   const [isGenerating, setIsGenerating] = useState(false)
-  const [canvasReady, setCanvasReady] = useState(false)
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null)
+  const desktopCanvasRef = useRef<HTMLCanvasElement>(null)
+  const mobileCanvasRef = useRef<HTMLCanvasElement>(null)
 
   // Reset selected goals when dialog closes
   useEffect(() => {
     if (!open) {
       setSelectedGoals([])
-      setCanvasReady(false)
-    } else {
-      // Wait for dialog to mount before drawing
-      const timer = setTimeout(() => setCanvasReady(true), 100)
-      return () => clearTimeout(timer)
     }
   }, [open])
 
@@ -328,11 +323,23 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
 
   // Update preview when theme or goals change
   useEffect(() => {
-    if (canvasReady && previewCanvasRef.current) {
-      const goalsToRender = goals.filter(g => selectedGoals.includes(g.id))
-      drawPoster(previewCanvasRef.current, 0.4, goalsToRender)
+    if (!open) return
+    
+    const goalsToRender = goals.filter(g => selectedGoals.includes(g.id))
+    
+    // Draw on both canvases
+    const drawBoth = () => {
+      if (desktopCanvasRef.current) {
+        drawPoster(desktopCanvasRef.current, 0.4, goalsToRender)
+      }
+      if (mobileCanvasRef.current) {
+        drawPoster(mobileCanvasRef.current, 0.3, goalsToRender)
+      }
     }
-  }, [selectedTheme, selectedGoals, canvasReady, userName, userAvatar, goals])
+    
+    // Small delay to ensure canvas is mounted
+    requestAnimationFrame(drawBoth)
+  }, [selectedTheme, selectedGoals, open, userName, userAvatar, goals])
 
   const downloadPoster = async () => {
     setIsGenerating(true)
@@ -461,11 +468,11 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
 
             {/* Mobile Preview - Small */}
             <div className="md:hidden flex justify-center">
-              <div className="w-[120px] aspect-[9/16] rounded-xl overflow-hidden shadow-lg bg-muted">
+              <div className="w-[140px] aspect-[9/16] rounded-xl overflow-hidden shadow-lg bg-muted">
                 <canvas 
-                  ref={previewCanvasRef}
-                  width={432}
-                  height={768}
+                  ref={mobileCanvasRef}
+                  width={324}
+                  height={576}
                   className="w-full h-full"
                 />
               </div>
@@ -477,7 +484,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
             <label className="text-sm font-medium mb-3 block self-start">ตัวอย่าง</label>
             <div className="w-full max-w-[320px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl bg-muted">
               <canvas 
-                ref={previewCanvasRef}
+                ref={desktopCanvasRef}
                 width={432}
                 height={768}
                 className="w-full h-full"
