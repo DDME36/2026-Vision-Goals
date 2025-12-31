@@ -25,10 +25,14 @@
 @layer base {
   * {
     @apply border-border;
+    /* ป้องกัน text zoom บน iOS */
+    -webkit-text-size-adjust: 100%;
   }
   html {
     /* ป้องกัน iOS bounce scroll */
     overscroll-behavior: none;
+    /* ป้องกัน iOS zoom เมื่อ focus input */
+    touch-action: manipulation;
   }
   body {
     @apply bg-background text-foreground;
@@ -36,6 +40,17 @@
     padding-top: env(safe-area-inset-top);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+    /* ป้องกัน iOS overscroll */
+    -webkit-overflow-scrolling: touch;
+  }
+  /* ป้องกัน iOS zoom เมื่อ focus input (font-size < 16px) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  @media (min-width: 640px) {
+    input, select, textarea {
+      font-size: inherit !important;
+    }
   }
 }
 
