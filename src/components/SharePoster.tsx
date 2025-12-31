@@ -61,13 +61,38 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
   const [isGenerating, setIsGenerating] = useState(false)
   const desktopCanvasRef = useRef<HTMLCanvasElement>(null)
   const mobileCanvasRef = useRef<HTMLCanvasElement>(null)
+  const cachedAvatarRef = useRef<HTMLImageElement | null>(null)
 
-  // Reset selected goals when dialog closes
+  // Reset selected goals when dialog closes, preload avatar when opens
   useEffect(() => {
     if (!open) {
       setSelectedGoals([])
+      cachedAvatarRef.current = null
+    } else if (userAvatar) {
+      // Preload avatar image
+      const img = new Image()
+      const isBase64 = userAvatar.startsWith('data:')
+      if (!isBase64) {
+        img.crossOrigin = 'anonymous'
+      }
+      img.onload = () => {
+        cachedAvatarRef.current = img
+        // Redraw canvases with avatar
+        const goalsToRender = goals.filter(g => selectedGoals.includes(g.id))
+        if (desktopCanvasRef.current) {
+          drawPoster(desktopCanvasRef.current, 0.4, goalsToRender, img)
+        }
+        if (mobileCanvasRef.current) {
+          drawPoster(mobileCanvasRef.current, 0.3, goalsToRender, img)
+        }
+      }
+      if (!isBase64 && (userAvatar.includes('googleusercontent.com') || userAvatar.includes('facebook.com') || userAvatar.includes('fbcdn.net') || userAvatar.includes('discordapp.com') || userAvatar.includes('cdn.discordapp.com'))) {
+        img.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(userAvatar)}`
+      } else {
+        img.src = userAvatar
+      }
     }
-  }, [open])
+  }, [open, userAvatar])
 
   const toggleGoal = (id: string) => {
     setSelectedGoals(prev => 
@@ -77,7 +102,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
     )
   }
 
-  const drawPoster = async (canvas: HTMLCanvasElement, scale: number = 1, goalsToRender: Goal[]) => {
+  const drawPoster = (canvas: HTMLCanvasElement, scale: number = 1, goalsToRender: Goal[], avatarImg?: HTMLImageElement | null) => {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
@@ -164,35 +189,16 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
       ctx.fillText(userName.charAt(0).toUpperCase(), avatarCenterX, avatarY + 12*s)
     }
 
-    if (userAvatar) {
-      // Check if it's a base64 image (no CORS issues)
-      const isBase64 = userAvatar.startsWith('data:')
-      
+    // Use cached avatar or fallback to initials
+    if (avatarImg) {
       try {
-        const img = new Image()
-        if (!isBase64) {
-          img.crossOrigin = 'anonymous'
-        }
-        
-        await new Promise((resolve, reject) => {
-          img.onload = resolve
-          img.onerror = reject
-          // For external URLs (Google/Facebook), try using a CORS proxy
-          if (!isBase64 && (userAvatar.includes('googleusercontent.com') || userAvatar.includes('facebook.com') || userAvatar.includes('fbcdn.net'))) {
-            // Use allorigins proxy for CORS
-            img.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(userAvatar)}`
-          } else {
-            img.src = userAvatar
-          }
-        })
-        
         // Draw circular avatar
         ctx.save()
         ctx.beginPath()
         ctx.arc(avatarCenterX, avatarY, avatarSize/2, 0, Math.PI * 2)
         ctx.closePath()
         ctx.clip()
-        ctx.drawImage(img, avatarCenterX - avatarSize/2, avatarY - avatarSize/2, avatarSize, avatarSize)
+        ctx.drawImage(avatarImg, avatarCenterX - avatarSize/2, avatarY - avatarSize/2, avatarSize, avatarSize)
         ctx.restore()
         
         // Border
@@ -201,12 +207,10 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
         ctx.beginPath()
         ctx.arc(avatarCenterX, avatarY, avatarSize/2, 0, Math.PI * 2)
         ctx.stroke()
-      } catch (e) {
-        // Draw initial if avatar fails
+      } catch {
         drawInitialsFallback()
       }
     } else {
-      // Draw initial
       drawInitialsFallback()
     }
 
@@ -327,19 +331,16 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
     
     const goalsToRender = goals.filter(g => selectedGoals.includes(g.id))
     
-    // Draw on both canvases
-    const drawBoth = () => {
+    // Draw on both canvases immediately (sync, no waiting for avatar)
+    requestAnimationFrame(() => {
       if (desktopCanvasRef.current) {
-        drawPoster(desktopCanvasRef.current, 0.4, goalsToRender)
+        drawPoster(desktopCanvasRef.current, 0.4, goalsToRender, cachedAvatarRef.current)
       }
       if (mobileCanvasRef.current) {
-        drawPoster(mobileCanvasRef.current, 0.3, goalsToRender)
+        drawPoster(mobileCanvasRef.current, 0.3, goalsToRender, cachedAvatarRef.current)
       }
-    }
-    
-    // Small delay to ensure canvas is mounted
-    requestAnimationFrame(drawBoth)
-  }, [selectedTheme, selectedGoals, open, userName, userAvatar, goals])
+    })
+  }, [selectedTheme, selectedGoals, open, userName, goals])
 
   const downloadPoster = async () => {
     setIsGenerating(true)
@@ -347,7 +348,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
     try {
       const canvas = document.createElement('canvas')
       const goalsToRender = goals.filter(g => selectedGoals.includes(g.id))
-      await drawPoster(canvas, 1, goalsToRender)
+      drawPoster(canvas, 1, goalsToRender, cachedAvatarRef.current)
       
       const dataUrl = canvas.toDataURL('image/png', 1)
       const link = document.createElement('a')
