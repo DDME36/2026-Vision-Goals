@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.1.4'
+const APP_VERSION = '1.1.5'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -182,12 +182,14 @@ export default function Home() {
 
   const handleSignOut = async () => {
     try {
-      // Clear cache and force reload to prevent stale state
-      await authApi.signOut(true)
+      await authApi.signOut(false) // ไม่ต้อง force reload - ให้ React จัดการ state
+      setUser(null)
+      setGoals([])
     } catch (err) {
       console.error('Sign out error:', err)
-      // Force reload anyway
-      window.location.href = window.location.origin
+      // Force clear state anyway
+      setUser(null)
+      setGoals([])
     }
   }
 

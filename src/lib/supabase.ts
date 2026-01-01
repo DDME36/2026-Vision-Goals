@@ -185,7 +185,7 @@ export const authApi = {
         const keysToRemove: string[] = []
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i)
-          if (key && (key.includes('supabase') || key.includes('sb-'))) {
+          if (key && (key.includes('supabase') || key.includes('sb-') || key.includes('goals-2026-auth'))) {
             keysToRemove.push(key)
           }
         }
@@ -193,20 +193,23 @@ export const authApi = {
         
         // Clear sessionStorage too
         sessionStorage.clear()
-        
-        // Force reload to clear any cached state
-        if (forceReload) {
+      }
+      
+      // Only force reload if explicitly requested AND not on Safari iOS
+      // Safari iOS handles state changes better without reload
+      if (forceReload && typeof window !== 'undefined') {
+        const isSafariIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+                           /Safari/.test(navigator.userAgent) && 
+                           !/Chrome|CriOS|FxiOS/.test(navigator.userAgent)
+        if (!isSafariIOS) {
           window.location.href = window.location.origin
         }
       }
     } catch (err) {
-      // Even if error, still clear local storage and reload
+      // Even if error, still clear local storage
       if (typeof window !== 'undefined') {
         localStorage.clear()
         sessionStorage.clear()
-        if (forceReload) {
-          window.location.href = window.location.origin
-        }
       }
       console.log('Sign out completed with cleanup')
     }
