@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Target, LogOut, Share2, Settings } from 'lucide-react'
+import { Target, LogOut, Share2, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { User as SupabaseUser } from '@supabase/supabase-js'
 
@@ -11,9 +11,10 @@ interface HeaderProps {
   onSignOut: () => void
   onShare?: () => void
   onEditProfile?: () => void
+  onFeedback?: () => void
 }
 
-export function Header({ user, onSignOut, onShare, onEditProfile }: HeaderProps) {
+export function Header({ user, onSignOut, onShare, onEditProfile, onFeedback }: HeaderProps) {
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
   // ใช้ avatar เฉพาะที่เป็น base64 หรือ URL ที่ valid เท่านั้น
   const avatarUrl = user?.user_metadata?.avatar_url
@@ -36,7 +37,15 @@ export function Header({ user, onSignOut, onShare, onEditProfile }: HeaderProps)
 
         {/* User Menu */}
         {user && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Feedback Button */}
+            {onFeedback && (
+              <Button variant="ghost" size="sm" onClick={onFeedback} className="gap-1.5 h-8 px-2">
+                <MessageSquare className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">Feedback</span>
+              </Button>
+            )}
+
             {/* Share Button */}
             {onShare && (
               <Button variant="ghost" size="sm" onClick={onShare} className="gap-1.5 h-8 px-2">

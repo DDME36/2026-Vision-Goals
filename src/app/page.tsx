@@ -14,13 +14,14 @@ import { BentoGrid } from '@/components/BentoGrid'
 import { GoalModal } from '@/components/GoalModal'
 import { SharePoster } from '@/components/SharePoster'
 import { ProfileModal } from '@/components/ProfileModal'
+import { FeedbackModal } from '@/components/FeedbackModal'
 import { Countdown } from '@/components/Countdown'
 import { CelebrationEffect } from '@/components/CelebrationEffect'
 import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.0.8'
+const APP_VERSION = '1.1.0'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -30,6 +31,7 @@ export default function Home() {
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const [lastCompletedCount, setLastCompletedCount] = useState(0)
   const [filterCategory, setFilterCategory] = useState<string | null>(null)
@@ -355,6 +357,7 @@ export default function Home() {
         onSignOut={handleSignOut} 
         onShare={() => setShareOpen(true)} 
         onEditProfile={() => setProfileOpen(true)}
+        onFeedback={() => setFeedbackOpen(true)}
       />
 
       <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-6">
@@ -579,6 +582,12 @@ export default function Home() {
         currentName={userName}
         currentAvatar={userAvatar}
         onUpdate={handleProfileUpdate}
+      />
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        open={feedbackOpen}
+        onOpenChange={setFeedbackOpen}
       />
 
       {/* Floating Add Button - Mobile only */}

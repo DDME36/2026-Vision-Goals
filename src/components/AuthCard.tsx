@@ -167,11 +167,11 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
         <div className="flex bg-muted rounded-xl p-1 mb-5 sm:mb-6 relative">
           {/* Animated background */}
           <motion.div
-            className="absolute top-1 bottom-1 bg-card rounded-lg shadow-sm"
+            className="absolute top-1 bottom-1 left-1 bg-card rounded-lg shadow-sm"
+            style={{ width: 'calc(50% - 4px)' }}
             initial={false}
             animate={{
-              left: mode === 'signin' ? '4px' : '50%',
-              right: mode === 'signin' ? '50%' : '4px',
+              x: mode === 'signin' ? 0 : 'calc(100% + 4px)',
             }}
             transition={smoothSpring}
           />
