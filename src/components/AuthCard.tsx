@@ -171,7 +171,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
             style={{ width: 'calc(50% - 4px)' }}
             initial={false}
             animate={{
-              x: mode === 'signin' ? 0 : 'calc(100% + 4px)',
+              x: mode === 'signin' ? 0 : 'calc(100% + 2px)',
             }}
             transition={smoothSpring}
           />
