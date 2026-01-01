@@ -66,46 +66,39 @@ export const goalsApi = {
   async getAll(userId: string): Promise<Goal[]> {
     console.log('goalsApi.getAll: Starting...')
     
-    // ⚙️ ปรับเวลาเพิ่ม! 20 วินาที เพราะ Supabase Free Tier มี Cold Start 10-15 วิ
+    // ⚙️ 20 วินาที เพราะ Supabase Free Tier มี Cold Start 10-15 วิ
     const MAX_RETRIES = 3
     const TIMEOUT_MS = 20000
     
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      // สร้าง Controller เอง ปลอดภัยกว่า AbortSignal.timeout() บน iOS เก่า
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
-      
       try {
         console.log(`goalsApi.getAll: Attempt ${attempt}/${MAX_RETRIES}`)
         
-        const { data, error } = await supabase
+        // ใช้ Promise.race แทน AbortController เพราะ Safari มีปัญหา
+        const fetchPromise = supabase
           .from('goals')
           .select('*')
           .eq('user_id', userId)
           .order('position', { ascending: true })
-          .abortSignal(controller.signal)
         
-        // ถ้ามาถึงตรงนี้ แปลว่าโหลดเสร็จก่อนเวลา -> ยกเลิกตัวจับเวลา
-        clearTimeout(timeoutId)
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('TIMEOUT')), TIMEOUT_MS)
+        )
+        
+        const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any
         
         if (error) throw error
         
         console.log('goalsApi.getAll: Success!')
         return data || []
       } catch (err: any) {
-        // อย่าลืมเคลียร์ timeout ถ้าเกิด error
-        clearTimeout(timeoutId)
-        
         // 🔥 ถ้าเจอ 401 Auth Error ให้ "หยุดทันที" อย่า Retry!
         if (isAuthError(err)) {
           console.error('Critical Auth Error: Token Invalid')
           throw new Error('SESSION_EXPIRED')
         }
         
-        // เช็คว่าเป็น Error จากการ Timeout หรือไม่
-        const isTimeout = err?.name === 'AbortError' || err?.message?.includes('timed out')
-        const errorMessage = isTimeout ? 'Request timed out' : (err?.message || 'Unknown error')
-        
+        const errorMessage = err?.message || 'Unknown error'
         console.warn(`goalsApi.getAll: Attempt ${attempt} failed:`, errorMessage)
         
         if (attempt === MAX_RETRIES) {
