@@ -48,13 +48,6 @@ export async function checkDatabaseHealth(): Promise<boolean> {
   }
 }
 
-// Timeout helper for Safari
-const timeoutPromise = (ms: number) => {
-  return new Promise((_, reject) => 
-    setTimeout(() => reject(new Error('Request timed out')), ms)
-  )
-}
-
 // Delay helper for retry backoff
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -63,43 +56,53 @@ export const goalsApi = {
   async getAll(userId: string): Promise<Goal[]> {
     console.log('goalsApi.getAll: Starting...')
     
-    // ⚙️ ตั้งค่า: ลองใหม่ได้ 3 ครั้ง, แต่ละครั้งให้เวลาแค่ 5 วินาที
+    // ⚙️ ปรับเวลาเพิ่ม! 20 วินาที เพราะ Supabase Free Tier มี Cold Start 10-15 วิ
     const MAX_RETRIES = 3
-    const TIMEOUT_MS = 5000
+    const TIMEOUT_MS = 20000
     
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      // สร้าง Controller เอง ปลอดภัยกว่า AbortSignal.timeout() บน iOS เก่า
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
+      
       try {
         console.log(`goalsApi.getAll: Attempt ${attempt}/${MAX_RETRIES}`)
         
-        // แข่งกันระหว่าง "ดึงข้อมูล" กับ "จับเวลา"
-        const result = await Promise.race([
-          supabase
-            .from('goals')
-            .select('*')
-            .eq('user_id', userId)
-            .order('position', { ascending: true }),
-          timeoutPromise(TIMEOUT_MS)
-        ]) as { data: Goal[] | null; error: any }
+        const { data, error } = await supabase
+          .from('goals')
+          .select('*')
+          .eq('user_id', userId)
+          .order('position', { ascending: true })
+          .abortSignal(controller.signal)
         
-        if (result.error) throw result.error
+        // ถ้ามาถึงตรงนี้ แปลว่าโหลดเสร็จก่อนเวลา -> ยกเลิกตัวจับเวลา
+        clearTimeout(timeoutId)
+        
+        if (error) throw error
         
         console.log('goalsApi.getAll: Success!')
-        return result.data || []
+        return data || []
       } catch (err: any) {
-        console.warn(`goalsApi.getAll: Attempt ${attempt} failed:`, err?.message)
+        // อย่าลืมเคลียร์ timeout ถ้าเกิด error
+        clearTimeout(timeoutId)
         
-        // ถ้าเป็นรอบสุดท้ายแล้ว ยังไม่ได้อีก ให้โยน Error ออกไป
+        // เช็คว่าเป็น Error จากการ Timeout หรือไม่
+        const isTimeout = err?.name === 'AbortError' || err?.message?.includes('timed out')
+        const errorMessage = isTimeout ? 'Request timed out' : (err?.message || 'Unknown error')
+        
+        console.warn(`goalsApi.getAll: Attempt ${attempt} failed:`, errorMessage)
+        
         if (attempt === MAX_RETRIES) {
           console.error('goalsApi.getAll: All retries failed.')
           throw err
         }
         
-        // ถ้ายังไม่ครบโควต้า ให้พักแป๊บนึงแล้วลองใหม่ (Backoff Strategy)
-        await delay(attempt * 500)
+        // พักนานขึ้นหน่อย (1วิ, 2วิ)
+        await delay(attempt * 1000)
       }
     }
     
-    return [] // กันตาย
+    return []
   },
 
   async create(goal: Omit<Goal, 'id' | 'created_at' | 'updated_at'>): Promise<Goal> {
