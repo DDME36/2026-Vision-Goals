@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Target, User, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Target, User, Lock, ArrowRight, Loader2, Eye, EyeOff, UserPlus, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { authApi } from '@/lib/supabase'
@@ -16,11 +16,13 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleUsernameAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,6 +30,12 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
     // Check network first
     if (!isOnline()) {
       setError('ไม่มีการเชื่อมต่ออินเทอร์เน็ต')
+      return
+    }
+
+    // Validate confirm password for signup
+    if (mode === 'signup' && password !== confirmPassword) {
+      setError('รหัสผ่านไม่ตรงกัน')
       return
     }
     
@@ -43,11 +51,11 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
         await authApi.signUpWithUsername(username, password)
         setMessage('สร้างบัญชีสำเร็จ! เข้าสู่ระบบได้เลย')
         setMode('signin')
+        setConfirmPassword('')
       }
     } catch (err: unknown) {
       const appError = parseError(err)
       
-      // แปลง error message เป็นภาษาไทย
       const errorMessages: Record<string, string> = {
         'Invalid login credentials': 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
         'Email not confirmed': 'กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ',
@@ -56,7 +64,6 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
         'Unable to validate email address: invalid format': 'รูปแบบไม่ถูกต้อง',
       }
       
-      // Check for specific error codes first
       if (appError.code === ErrorCodes.NETWORK_ERROR) {
         setError('ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสอบอินเทอร์เน็ต')
       } else if (appError.code === ErrorCodes.RATE_LIMITED) {
@@ -74,7 +81,6 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
   }
 
   const handleOAuthSignIn = async (provider: 'google' | 'facebook' | 'discord') => {
-    // Check network first
     if (!isOnline()) {
       setError('ไม่มีการเชื่อมต่ออินเทอร์เน็ต')
       return
@@ -102,13 +108,20 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
     }
   }
 
+  const toggleMode = () => {
+    setMode(mode === 'signin' ? 'signup' : 'signin')
+    setError('')
+    setMessage('')
+    setConfirmPassword('')
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="w-full max-w-md mx-auto px-4"
     >
-      <div className="bg-card border border-border rounded-2xl shadow-xl p-5 sm:p-8">
+      <div className="bg-card border border-border rounded-2xl shadow-xl p-5 sm:p-8 overflow-hidden">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <motion.div
@@ -120,14 +133,62 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
             <Target className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
           </motion.div>
           <h1 className="font-display text-2xl sm:text-4xl text-foreground mb-1 sm:mb-2">2026 Vision Board</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm font-display">
-            {mode === 'signin' ? 'ยินดีต้อนรับกลับ' : 'เริ่มต้นการเดินทาง'}
-          </p>
+          
+          {/* Mode indicator with animation */}
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={mode}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="text-muted-foreground text-xs sm:text-sm font-display flex items-center justify-center gap-2"
+            >
+              {mode === 'signin' ? (
+                <>
+                  <LogIn className="w-4 h-4" />
+                  ยินดีต้อนรับกลับ
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-4 h-4" />
+                  เริ่มต้นการเดินทาง
+                </>
+              )}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+
+        {/* Mode Toggle Tabs */}
+        <div className="flex bg-muted rounded-xl p-1 mb-5 sm:mb-6">
+          <button
+            type="button"
+            onClick={() => mode !== 'signin' && toggleMode()}
+            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
+              mode === 'signin'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <LogIn className="w-4 h-4" />
+            เข้าสู่ระบบ
+          </button>
+          <button
+            type="button"
+            onClick={() => mode !== 'signup' && toggleMode()}
+            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
+              mode === 'signup'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <UserPlus className="w-4 h-4" />
+            สมัครสมาชิก
+          </button>
         </div>
 
         {/* OAuth Buttons */}
         <div className="space-y-2 sm:space-y-3 mb-5 sm:mb-6">
-          {/* Google */}
           <Button
             type="button"
             variant="outline"
@@ -140,31 +201,17 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
             ) : (
               <>
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  />
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
                 Google
               </>
             )}
           </Button>
 
-          {/* Facebook & Discord in row on mobile */}
           <div className="grid grid-cols-2 gap-2">
-            {/* Facebook */}
             <Button
               type="button"
               variant="outline"
@@ -184,7 +231,6 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
               )}
             </Button>
 
-            {/* Discord */}
             <Button
               type="button"
               variant="outline"
@@ -216,9 +262,18 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
           </div>
         </div>
 
-        {/* Email Form */}
-        <form onSubmit={handleUsernameAuth} className="space-y-3 sm:space-y-4">
-          <div className="space-y-2">
+        {/* Form with animation */}
+        <AnimatePresence mode="wait">
+          <motion.form
+            key={mode}
+            initial={{ opacity: 0, x: mode === 'signup' ? 20 : -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: mode === 'signup' ? -20 : 20 }}
+            transition={{ duration: 0.3 }}
+            onSubmit={handleUsernameAuth}
+            className="space-y-3 sm:space-y-4"
+          >
+            {/* Username */}
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -232,9 +287,8 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
                 autoCapitalize="off"
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
+            {/* Password */}
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -244,7 +298,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-10 pr-10 h-10 sm:h-11 text-base"
                 required
-                autoComplete="current-password"
+                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
               />
               <button
                 type="button"
@@ -254,55 +308,97 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-          </div>
 
-          {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xs sm:text-sm text-red-500 text-center"
-            >
-              {error}
-            </motion.p>
-          )}
+            {/* Confirm Password - only for signup */}
+            <AnimatePresence>
+              {mode === 'signup' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative overflow-hidden"
+                >
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="ยืนยันรหัสผ่าน"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={`pl-10 pr-10 h-10 sm:h-11 text-base ${
+                        confirmPassword && password !== confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''
+                      }`}
+                      required
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {confirmPassword && password !== confirmPassword && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-xs text-red-500 mt-1"
+                    >
+                      รหัสผ่านไม่ตรงกัน
+                    </motion.p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          {message && (
-            <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xs sm:text-sm text-green-600 text-center"
-            >
-              {message}
-            </motion.p>
-          )}
-
-          <Button type="submit" className="w-full h-10 sm:h-12" disabled={loading || loadingProvider !== null}>
-            {loading ? (
-              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-            ) : (
-              <>
-                {mode === 'signin' ? 'เข้าสู่ระบบ' : 'สร้างบัญชี'}
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </>
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs sm:text-sm text-red-500 text-center"
+              >
+                {error}
+              </motion.p>
             )}
-          </Button>
-        </form>
 
-        {/* Toggle Mode */}
-        <p className="text-center text-xs sm:text-sm text-muted-foreground mt-5 sm:mt-6">
-          {mode === 'signin' ? 'ยังไม่มีบัญชี?' : 'มีบัญชีอยู่แล้ว?'}{' '}
-          <button
-            type="button"
-            onClick={() => {
-              setMode(mode === 'signin' ? 'signup' : 'signin')
-              setError('')
-              setMessage('')
-            }}
-            className="text-primary hover:underline font-medium"
-          >
-            {mode === 'signin' ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ'}
-          </button>
-        </p>
+            {message && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs sm:text-sm text-green-600 text-center"
+              >
+                {message}
+              </motion.p>
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full h-10 sm:h-12" 
+              disabled={loading || loadingProvider !== null || (mode === 'signup' && password !== confirmPassword)}
+            >
+              {loading ? (
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+              ) : (
+                <>
+                  {mode === 'signin' ? (
+                    <>
+                      <LogIn className="w-4 h-4 mr-2" />
+                      เข้าสู่ระบบ
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      สร้างบัญชี
+                    </>
+                  )}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </motion.form>
+        </AnimatePresence>
       </div>
     </motion.div>
   )
