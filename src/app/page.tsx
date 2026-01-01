@@ -17,6 +17,7 @@ import { ProfileModal } from '@/components/ProfileModal'
 import { Countdown } from '@/components/Countdown'
 import { CelebrationEffect } from '@/components/CelebrationEffect'
 import { SkeletonGrid } from '@/components/SkeletonGrid'
+import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -561,6 +562,9 @@ export default function Home() {
         currentAvatar={userAvatar}
         onUpdate={handleProfileUpdate}
       />
+
+      {/* Floating Add Button - Mobile only */}
+      <FloatingAddButton onClick={handleAddGoal} />
 
       {/* Celebration Effect - 100% Complete */}
       <CelebrationEffect 

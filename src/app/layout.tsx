@@ -20,6 +20,19 @@ const sriracha = Sriracha({
 export const metadata: Metadata = {
   title: '2026 Vision Board | เป้าหมายปี 2026',
   description: 'จดบันทึกและติดตามเป้าหมายของคุณในปี 2026',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: '2026 Goals',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
+  },
 }
 
 // Viewport config สำหรับ iOS - ป้องกัน zoom อัตโนมัติเมื่อ focus input
