@@ -19,6 +19,9 @@ import { CelebrationEffect } from '@/components/CelebrationEffect'
 import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
+// App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
+const APP_VERSION = '1.0.1'
+
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
   const [goals, setGoals] = useState<Goal[]>([])
@@ -75,6 +78,21 @@ export default function Home() {
 
   // Auth state listener
   useEffect(() => {
+    // Version check - force reload if version mismatch
+    const storedVersion = localStorage.getItem('app_version')
+    if (storedVersion && storedVersion !== APP_VERSION) {
+      localStorage.setItem('app_version', APP_VERSION)
+      // Clear all caches and force reload
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => caches.delete(name))
+        })
+      }
+      window.location.reload()
+      return
+    }
+    localStorage.setItem('app_version', APP_VERSION)
+
     // Initialize audio on first interaction (for iOS)
     const handleFirstInteraction = () => {
       initAudio()
