@@ -166,14 +166,41 @@ export const authApi = {
     return data
   },
 
-  async signOut() {
+  async signOut(forceReload: boolean = false) {
     try {
-      const { error } = await supabase.auth.signOut()
-      // Ignore session missing error - user is already logged out
-      if (error && !error.message.includes('session')) throw error
+      // Sign out from Supabase
+      await supabase.auth.signOut()
+      
+      // Clear all localStorage items related to auth
+      if (typeof window !== 'undefined') {
+        // Clear Supabase auth tokens
+        const keysToRemove: string[] = []
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && (key.includes('supabase') || key.includes('sb-'))) {
+            keysToRemove.push(key)
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key))
+        
+        // Clear sessionStorage too
+        sessionStorage.clear()
+        
+        // Force reload to clear any cached state
+        if (forceReload) {
+          window.location.href = window.location.origin
+        }
+      }
     } catch (err) {
-      // Silently handle if no session exists
-      console.log('Sign out completed')
+      // Even if error, still clear local storage and reload
+      if (typeof window !== 'undefined') {
+        localStorage.clear()
+        sessionStorage.clear()
+        if (forceReload) {
+          window.location.href = window.location.origin
+        }
+      }
+      console.log('Sign out completed with cleanup')
     }
   },
 

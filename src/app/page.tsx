@@ -151,12 +151,12 @@ export default function Home() {
 
   const handleSignOut = async () => {
     try {
-      await authApi.signOut()
+      // Clear cache and force reload to prevent stale state
+      await authApi.signOut(true)
     } catch (err) {
       console.error('Sign out error:', err)
-    } finally {
-      setUser(null)
-      setGoals([])
+      // Force reload anyway
+      window.location.href = window.location.origin
     }
   }
 
