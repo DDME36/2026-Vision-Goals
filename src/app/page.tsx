@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.2.2'
+const APP_VERSION = '1.2.3'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -37,7 +37,6 @@ export default function Home() {
   const [filterCategory, setFilterCategory] = useState<string | null>(null)
   const [filterPriority, setFilterPriority] = useState<string | null>(null)
   const deletedGoalRef = useRef<Goal | null>(null)
-  const fetchingRef = useRef(false) // ป้องกันการ fetch ซ้ำ
 
   // Filter configs
   const categories = [
@@ -169,12 +168,8 @@ export default function Home() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [user])
 
-  // Fetch goals when user changes (backup - in case auth event missed)
-  useEffect(() => {
-    if (user && goals.length === 0) {
-      fetchGoals(user.id)
-    }
-  }, [user])
+  // ลบ useEffect ที่ fetch goals เมื่อ user เปลี่ยน - ให้ Auth Listener จัดการอย่างเดียว
+  // เพื่อป้องกัน Race Condition บน Safari
 
   const fetchGoals = async (userId?: string) => {
     const uid = userId || user?.id
@@ -183,13 +178,6 @@ export default function Home() {
       console.log('fetchGoals: No userId, returning')
       return
     }
-    
-    // ป้องกันการ fetch ซ้ำพร้อมกัน
-    if (fetchingRef.current) {
-      console.log('fetchGoals: Already fetching, skipping')
-      return
-    }
-    fetchingRef.current = true
     
     try {
       console.log('fetchGoals: Calling goalsApi.getAll...')
@@ -200,8 +188,6 @@ export default function Home() {
     } catch (err) {
       console.error('Error fetching goals:', err)
       handleApiError(err, 'ไม่สามารถโหลดเป้าหมายได้ กรุณาลองใหม่')
-    } finally {
-      fetchingRef.current = false
     }
   }
 
