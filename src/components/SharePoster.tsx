@@ -364,7 +364,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto max-sm:pt-12">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto max-sm:pt-8">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
