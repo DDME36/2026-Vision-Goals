@@ -65,11 +65,11 @@ export function Countdown() {
   }
 
   return (
-    <div className="text-right">
-      <h2 className="font-display text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-foreground whitespace-nowrap">
+    <div className="text-right min-w-[120px] sm:min-w-[140px]">
+      <h2 className="font-display text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-foreground whitespace-nowrap tabular-nums">
         เหลือ {time.days} วัน
       </h2>
-      <p className="text-muted-foreground text-sm sm:text-base lg:text-lg tabular-nums">
+      <p className="text-muted-foreground text-sm sm:text-base lg:text-lg tabular-nums font-mono">
         {String(time.hours).padStart(2, '0')}:{String(time.minutes).padStart(2, '0')}:{String(time.seconds).padStart(2, '0')}
       </p>
     </div>

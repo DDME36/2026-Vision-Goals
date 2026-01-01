@@ -40,6 +40,8 @@
     padding-right: env(safe-area-inset-right);
     /* iOS smooth scrolling */
     -webkit-overflow-scrolling: touch;
+    /* Prevent overscroll bounce causing UI shake */
+    overscroll-behavior-y: none;
   }
   /* ป้องกัน iOS zoom เมื่อ focus input (font-size < 16px) */
   input, select, textarea {
