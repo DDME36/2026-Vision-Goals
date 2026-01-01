@@ -51,31 +51,54 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 // Goal CRUD Operations with retry
 export const goalsApi = {
   async getAll(userId: string): Promise<Goal[]> {
+    console.log('goalsApi.getAll: Starting...')
+    
     // ใช้ fetch ตรงๆ แทน Supabase client เพื่อแก้ปัญหา Safari ค้าง
     const url = `${supabaseUrl}/rest/v1/goals?user_id=eq.${userId}&order=position.asc`
     
+    // ดึง token จาก localStorage โดยตรง แทนการเรียก getSession()
+    let accessToken = supabaseAnonKey
+    try {
+      const storageKey = 'goals-2026-auth'
+      const stored = localStorage.getItem(storageKey)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed?.access_token) {
+          accessToken = parsed.access_token
+        }
+      }
+    } catch (e) {
+      console.log('goalsApi.getAll: Could not get token from storage, using anon key')
+    }
+    
+    console.log('goalsApi.getAll: Fetching from URL...')
+    
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
+    const timeoutId = setTimeout(() => {
+      console.log('goalsApi.getAll: Timeout! Aborting...')
+      controller.abort()
+    }, 15000)
     
     try {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || supabaseAnonKey}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
         },
         signal: controller.signal
       })
       
       clearTimeout(timeoutId)
+      console.log('goalsApi.getAll: Got response:', response.status)
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
       
       const data = await response.json()
+      console.log('goalsApi.getAll: Parsed data, count:', data?.length)
       return data || []
     } catch (err) {
       clearTimeout(timeoutId)
