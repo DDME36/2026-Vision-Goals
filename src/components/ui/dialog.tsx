@@ -35,8 +35,8 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         'fixed z-50 grid w-full gap-4 border border-border bg-card shadow-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out',
-        // Mobile: bottom sheet with rounded top corners and handle
-        'max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:max-h-[92vh] max-sm:overflow-y-auto max-sm:p-5 max-sm:pt-3 max-sm:pb-8',
+        // Mobile: bottom sheet with rounded top corners and handle - max-h reduced for Safari URL bar
+        'max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-t-3xl max-sm:rounded-b-none max-sm:max-h-[85vh] max-sm:overflow-y-auto max-sm:p-5 max-sm:pt-2 max-sm:pb-8',
         'max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:slide-in-from-bottom',
         // Desktop: centered modal
         'sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-lg sm:rounded-2xl sm:p-6 sm:max-h-[85vh] sm:overflow-y-auto',
@@ -45,12 +45,18 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
-      {/* Mobile drag handle */}
-      <div className="sm:hidden flex justify-center mb-2">
-        <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+      {/* Mobile drag handle and close button row */}
+      <div className="sm:hidden flex items-center justify-between pt-1 pb-1">
+        <div className="w-8" /> {/* Spacer */}
+        <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+        <DialogPrimitive.Close className="rounded-full p-2 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none active:bg-muted bg-muted/50">
+          <X className="h-5 w-5" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
       </div>
       {children}
-      <DialogPrimitive.Close className="absolute right-3 top-3 sm:right-4 sm:top-4 rounded-full p-1.5 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground bg-muted/50">
+      {/* Desktop close button */}
+      <DialogPrimitive.Close className="hidden sm:flex absolute right-4 top-4 rounded-full p-1.5 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground bg-muted/50">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
