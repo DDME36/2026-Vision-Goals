@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { Target, User, Lock, ArrowRight, Loader2, Eye, EyeOff, UserPlus, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,13 +27,11 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
   const handleUsernameAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Check network first
     if (!isOnline()) {
       setError('ไม่มีการเชื่อมต่ออินเทอร์เน็ต')
       return
     }
 
-    // Validate confirm password for signup
     if (mode === 'signup' && password !== confirmPassword) {
       setError('รหัสผ่านไม่ตรงกัน')
       return
@@ -121,81 +119,83 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
       animate={{ opacity: 1, y: 0 }}
       className="w-full max-w-md mx-auto px-4"
     >
-      <div className="bg-card border border-border rounded-2xl shadow-xl p-5 sm:p-8 overflow-hidden">
-        {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', delay: 0.1 }}
-            className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/10 mb-3 sm:mb-4"
-          >
-            <Target className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
-          </motion.div>
-          <h1 className="font-display text-2xl sm:text-4xl text-foreground mb-1 sm:mb-2">2026 Vision Board</h1>
-          
-          {/* Mode indicator with animation */}
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={mode}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="text-muted-foreground text-xs sm:text-sm font-display flex items-center justify-center gap-2"
+      <LayoutGroup>
+        <motion.div 
+          layout
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className="bg-card border border-border rounded-2xl shadow-xl p-5 sm:p-8 overflow-hidden"
+        >
+          {/* Header */}
+          <motion.div layout="position" className="text-center mb-6 sm:mb-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 0.1 }}
+              className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/10 mb-3 sm:mb-4"
             >
-              {mode === 'signin' ? (
-                <>
-                  <LogIn className="w-4 h-4" />
-                  ยินดีต้อนรับกลับ
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-4 h-4" />
-                  เริ่มต้นการเดินทาง
-                </>
-              )}
-            </motion.p>
-          </AnimatePresence>
-        </div>
+              <Target className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+            </motion.div>
+            <h1 className="font-display text-2xl sm:text-4xl text-foreground mb-1 sm:mb-2">2026 Vision Board</h1>
+            
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={mode}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+                className="text-muted-foreground text-xs sm:text-sm font-display flex items-center justify-center gap-2"
+              >
+                {mode === 'signin' ? (
+                  <>
+                    <LogIn className="w-4 h-4" />
+                    ยินดีต้อนรับกลับ
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" />
+                    เริ่มต้นการเดินทาง
+                  </>
+                )}
+              </motion.p>
+            </AnimatePresence>
+          </motion.div>
 
-        {/* Mode Toggle Tabs */}
-        <div className="flex bg-muted rounded-xl p-1 mb-5 sm:mb-6">
-          <button
-            type="button"
-            onClick={() => mode !== 'signin' && toggleMode()}
-            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
-              mode === 'signin'
-                ? 'bg-card text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <LogIn className="w-4 h-4" />
-            เข้าสู่ระบบ
-          </button>
-          <button
-            type="button"
-            onClick={() => mode !== 'signup' && toggleMode()}
-            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
-              mode === 'signup'
-                ? 'bg-card text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <UserPlus className="w-4 h-4" />
-            สมัครสมาชิก
-          </button>
-        </div>
+          {/* Mode Toggle Tabs */}
+          <motion.div layout="position" className="flex bg-muted rounded-xl p-1 mb-5 sm:mb-6">
+            <button
+              type="button"
+              onClick={() => mode !== 'signin' && toggleMode()}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
+                mode === 'signin'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <LogIn className="w-4 h-4" />
+              เข้าสู่ระบบ
+            </button>
+            <button
+              type="button"
+              onClick={() => mode !== 'signup' && toggleMode()}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
+                mode === 'signup'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <UserPlus className="w-4 h-4" />
+              สมัครสมาชิก
+            </button>
+          </motion.div>
 
-        {/* OAuth Buttons - only show for signin */}
-        <AnimatePresence>
+          {/* OAuth Buttons - only show for signin */}
           {mode === 'signin' && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden"
+              layout
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, delay: 0.1 }}
             >
               <div className="space-y-2 sm:space-y-3 mb-5 sm:mb-6">
                 <Button
@@ -272,16 +272,10 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
 
-        {/* Form with animation */}
-        <AnimatePresence mode="wait">
+          {/* Form */}
           <motion.form
-            key={mode}
-            initial={{ opacity: 0, x: mode === 'signup' ? 20 : -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: mode === 'signup' ? -20 : 20 }}
-            transition={{ duration: 0.3 }}
+            layout="position"
             onSubmit={handleUsernameAuth}
             className="space-y-3 sm:space-y-4"
           >
@@ -322,48 +316,39 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
             </div>
 
             {/* Confirm Password - only for signup */}
-            <AnimatePresence>
-              {mode === 'signup' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="relative overflow-hidden"
-                >
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="ยืนยันรหัสผ่าน"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`pl-10 pr-10 h-10 sm:h-11 text-base ${
-                        confirmPassword && password !== confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''
-                      }`}
-                      required
-                      autoComplete="new-password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {confirmPassword && password !== confirmPassword && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-xs text-red-500 mt-1"
-                    >
-                      รหัสผ่านไม่ตรงกัน
-                    </motion.p>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {mode === 'signup' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="ยืนยันรหัสผ่าน"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`pl-10 pr-10 h-10 sm:h-11 text-base ${
+                      confirmPassword && password !== confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''
+                    }`}
+                    required
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {confirmPassword && password !== confirmPassword && (
+                  <p className="text-xs text-red-500 mt-1">รหัสผ่านไม่ตรงกัน</p>
+                )}
+              </motion.div>
+            )}
 
             {error && (
               <motion.p
@@ -410,8 +395,8 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
               )}
             </Button>
           </motion.form>
-        </AnimatePresence>
-      </div>
+        </motion.div>
+      </LayoutGroup>
     </motion.div>
   )
 }
