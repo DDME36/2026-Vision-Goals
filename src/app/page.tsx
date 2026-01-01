@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.1.0'
+const APP_VERSION = '1.1.1'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -105,10 +105,16 @@ export default function Home() {
     document.addEventListener('click', handleFirstInteraction, { once: true })
 
     try {
-      const { data: { subscription } } = authApi.onAuthStateChange((_event, session) => {
-        setUser(session?.user ?? null)
-        if (!session?.user) {
+      const { data: { subscription } } = authApi.onAuthStateChange((event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id)
+        const newUser = session?.user ?? null
+        setUser(newUser)
+        if (!newUser) {
           setGoals([])
+        }
+        // Force fetch goals when user signs in
+        if (event === 'SIGNED_IN' && newUser) {
+          fetchGoals(newUser.id)
         }
       })
 
@@ -154,14 +160,15 @@ export default function Home() {
   // Fetch goals when user changes
   useEffect(() => {
     if (user) {
-      fetchGoals()
+      fetchGoals(user.id)
     }
   }, [user])
 
-  const fetchGoals = async () => {
-    if (!user) return
+  const fetchGoals = async (userId?: string) => {
+    const uid = userId || user?.id
+    if (!uid) return
     try {
-      const data = await goalsApi.getAll(user.id)
+      const data = await goalsApi.getAll(uid)
       setGoals(data)
       setLastCompletedCount(data.filter(g => g.status).length)
     } catch (err) {
