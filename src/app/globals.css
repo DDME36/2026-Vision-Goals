@@ -70,6 +70,12 @@
   }
 }
 
+/* Password input - bigger dots */
+input[type="password"] {
+  font-family: Verdana, sans-serif;
+  letter-spacing: 0.3em;
+}
+
 /* Safe area utilities */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
