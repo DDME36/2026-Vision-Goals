@@ -107,6 +107,29 @@ export default function Home() {
     }
   }, [])
 
+  // Re-check session when app becomes visible (iOS Safari background tab issue)
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && user) {
+        try {
+          const session = await authApi.ensureValidSession()
+          if (!session) {
+            handleSessionExpired()
+          } else {
+            // Refresh goals data
+            fetchGoals()
+          }
+        } catch (err) {
+          console.error('Session refresh error:', err)
+          handleSessionExpired()
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [user])
+
   // Fetch goals when user changes
   useEffect(() => {
     if (user) {

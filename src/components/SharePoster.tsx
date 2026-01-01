@@ -221,9 +221,9 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
     ctx.fillText(userName, nameX, avatarY + 10*s)
 
     // Goals
-    const startY = 400 * s
-    const cardHeight = 95 * s
-    const cardGap = 16 * s
+    const startY = 390 * s
+    const cardHeight = 100 * s
+    const cardGap = 18 * s
     const cardPadding = 64 * s
 
     ctx.textAlign = 'left'
