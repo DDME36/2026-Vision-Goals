@@ -98,7 +98,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
     setSelectedGoals(prev => 
       prev.includes(id) 
         ? prev.filter(g => g !== id)
-        : prev.length < 6 ? [...prev, id] : prev
+        : prev.length < 10 ? [...prev, id] : prev
     )
   }
 
@@ -221,9 +221,9 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
     ctx.fillText(userName, nameX, avatarY + 10*s)
 
     // Goals
-    const startY = 440 * s
-    const cardHeight = 100 * s
-    const cardGap = 20 * s
+    const startY = 420 * s
+    const cardHeight = 85 * s
+    const cardGap = 12 * s
     const cardPadding = 64 * s
 
     ctx.textAlign = 'left'
@@ -405,7 +405,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
             {/* Goal Selection */}
             <div>
               <label className="text-sm font-medium mb-2 sm:mb-3 block">
-                เลือกเป้าหมาย (สูงสุด 6 รายการ)
+                เลือกเป้าหมาย (สูงสุด 10 รายการ)
               </label>
               <div className="space-y-1.5 sm:space-y-2 max-h-[200px] sm:max-h-[300px] overflow-y-auto pr-1 sm:pr-2">
                 {goals.map(goal => (
