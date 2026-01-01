@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.1.8'
+const APP_VERSION = '1.1.9'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -115,7 +115,14 @@ export default function Home() {
         }
         // Fetch goals when user signs in OR when initial session has user
         if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && newUser) {
-          fetchGoals(newUser.id).finally(() => setLoading(false))
+          console.log('Triggering fetchGoals from auth event:', event)
+          fetchGoals(newUser.id).then(() => {
+            console.log('fetchGoals completed, setting loading false')
+            setLoading(false)
+          }).catch(err => {
+            console.error('fetchGoals failed:', err)
+            setLoading(false)
+          })
         }
       })
 
@@ -170,9 +177,15 @@ export default function Home() {
 
   const fetchGoals = async (userId?: string) => {
     const uid = userId || user?.id
-    if (!uid) return
+    console.log('fetchGoals called with userId:', uid)
+    if (!uid) {
+      console.log('fetchGoals: No userId, returning')
+      return
+    }
     try {
+      console.log('fetchGoals: Calling goalsApi.getAll...')
       const data = await goalsApi.getAll(uid)
+      console.log('fetchGoals: Got data:', data?.length, 'goals')
       setGoals(data)
       setLastCompletedCount(data.filter(g => g.status).length)
     } catch (err) {
