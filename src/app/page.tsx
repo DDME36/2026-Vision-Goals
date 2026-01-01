@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.2.9'
+const APP_VERSION = '1.3.0'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -195,7 +195,17 @@ export default function Home() {
       setLastCompletedCount(data.filter(g => g.status).length)
     } catch (err: any) {
       console.error('Error fetching goals:', err)
-      console.log('Error Message:', err?.message)
+      
+      // 🔥 ดักจับ Session Expired แล้วสั่ง Logout เลย
+      if (err?.message === 'SESSION_EXPIRED' || err?.code === 'PGRST301') {
+        console.log('Session expired caught in fetchGoals -> Force Logout')
+        toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่')
+        await authApi.signOut(true)
+        setUser(null)
+        setGoals([])
+        return
+      }
+      
       // ถ้าไม่ใช่ AbortError (การยกเลิกปกติ) ค่อยแจ้งเตือน
       if (err?.name !== 'AbortError') {
         handleApiError(err, 'โหลดข้อมูลไม่สำเร็จ')

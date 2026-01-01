@@ -51,6 +51,16 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 // Delay helper for retry backoff
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
+// Helper function เช็ค Error 401 (Auth Error)
+const isAuthError = (error: any) => {
+  return (
+    error?.code === 'PGRST301' || // Token expired/invalid
+    error?.status === 401 ||
+    error?.message?.includes('JWT') ||
+    error?.message?.includes('Invalid token')
+  )
+}
+
 // Goal CRUD Operations with retry
 export const goalsApi = {
   async getAll(userId: string): Promise<Goal[]> {
@@ -85,6 +95,12 @@ export const goalsApi = {
       } catch (err: any) {
         // อย่าลืมเคลียร์ timeout ถ้าเกิด error
         clearTimeout(timeoutId)
+        
+        // 🔥 ถ้าเจอ 401 Auth Error ให้ "หยุดทันที" อย่า Retry!
+        if (isAuthError(err)) {
+          console.error('Critical Auth Error: Token Invalid')
+          throw new Error('SESSION_EXPIRED')
+        }
         
         // เช็คว่าเป็น Error จากการ Timeout หรือไม่
         const isTimeout = err?.name === 'AbortError' || err?.message?.includes('timed out')
