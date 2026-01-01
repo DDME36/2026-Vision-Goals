@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.2.5'
+const APP_VERSION = '1.2.6'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -118,13 +118,8 @@ export default function Home() {
           console.log('Triggering fetchGoals from auth event:', event)
           // เพิ่ม delay เล็กน้อยให้ Safari พร้อมก่อน fetch
           setTimeout(() => {
-            fetchGoals(newUser.id).then(() => {
-              console.log('fetchGoals completed, setting loading false')
-              setLoading(false)
-            }).catch(err => {
-              console.error('fetchGoals failed:', err)
-              setLoading(false)
-            })
+            fetchGoals(newUser.id)
+            // fetchGoals จัดการ setLoading(false) เองใน finally แล้ว
           }, 100)
         }
       })
@@ -179,6 +174,7 @@ export default function Home() {
     console.log('fetchGoals called with userId:', uid)
     if (!uid) {
       console.log('fetchGoals: No userId, returning')
+      setLoading(false)
       return
     }
     
@@ -190,7 +186,11 @@ export default function Home() {
       setLastCompletedCount(data.filter(g => g.status).length)
     } catch (err) {
       console.error('Error fetching goals:', err)
-      handleApiError(err, 'ไม่สามารถโหลดเป้าหมายได้ กรุณาลองใหม่')
+      handleApiError(err, 'โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่')
+    } finally {
+      // ✅ สำคัญมาก: ใส่ finally เพื่อให้ Loading หายไปแน่นอน 100%
+      console.log('fetchGoals finished, force loading false')
+      setLoading(false)
     }
   }
 

@@ -48,22 +48,33 @@ export async function checkDatabaseHealth(): Promise<boolean> {
   }
 }
 
+// Timeout helper for Safari
+const timeoutPromise = (ms: number) => {
+  return new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Request timed out')), ms)
+  )
+}
+
 // Goal CRUD Operations with retry
 export const goalsApi = {
   async getAll(userId: string): Promise<Goal[]> {
-    console.log('goalsApi.getAll: Starting with Supabase client...')
+    console.log('goalsApi.getAll: Starting...')
     
     try {
-      const { data, error } = await supabase
-        .from('goals')
-        .select('*')
-        .eq('user_id', userId)
-        .order('position', { ascending: true })
+      // ใช้ Promise.race แข่งกันระหว่าง "ดึงข้อมูล" กับ "จับเวลา 10 วิ"
+      const result = await Promise.race([
+        supabase
+          .from('goals')
+          .select('*')
+          .eq('user_id', userId)
+          .order('position', { ascending: true }),
+        timeoutPromise(10000)
+      ]) as { data: Goal[] | null; error: any }
       
-      console.log('goalsApi.getAll: Got response, error:', error, 'data count:', data?.length)
+      console.log('goalsApi.getAll: Got response')
       
-      if (error) throw error
-      return data || []
+      if (result.error) throw result.error
+      return result.data || []
     } catch (err) {
       console.error('goalsApi.getAll error:', err)
       throw err
