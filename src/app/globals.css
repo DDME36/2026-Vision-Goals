@@ -70,10 +70,10 @@
   }
 }
 
-/* Password input - bigger dots */
-input[type="password"] {
+/* Password input - use Verdana for bigger dots when typing */
+input[type="password"]:not(:placeholder-shown) {
   font-family: Verdana, sans-serif;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.15em;
 }
 
 /* Safe area utilities */
