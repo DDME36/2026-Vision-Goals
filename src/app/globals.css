@@ -29,10 +29,8 @@
     -webkit-text-size-adjust: 100%;
   }
   html {
-    /* ป้องกัน iOS bounce scroll */
-    overscroll-behavior: none;
-    /* ป้องกัน iOS zoom เมื่อ focus input */
-    touch-action: manipulation;
+    /* ไม่ใช้ overscroll-behavior: none เพราะทำให้ iOS scroll แข็งๆ */
+    /* ไม่ใช้ touch-action: manipulation ทั้งหน้า เพราะจะไปขัดกับ dnd-kit */
   }
   body {
     @apply bg-background text-foreground;
@@ -40,7 +38,7 @@
     padding-top: env(safe-area-inset-top);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
-    /* ป้องกัน iOS overscroll */
+    /* iOS smooth scrolling */
     -webkit-overflow-scrolling: touch;
   }
   /* ป้องกัน iOS zoom เมื่อ focus input (font-size < 16px) */

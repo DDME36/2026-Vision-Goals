@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { IBM_Plex_Sans_Thai, Sriracha } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
@@ -20,6 +20,15 @@ const sriracha = Sriracha({
 export const metadata: Metadata = {
   title: '2026 Vision Board | เป้าหมายปี 2026',
   description: 'จดบันทึกและติดตามเป้าหมายของคุณในปี 2026',
+}
+
+// Viewport config สำหรับ iOS - ป้องกัน zoom อัตโนมัติเมื่อ focus input
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({

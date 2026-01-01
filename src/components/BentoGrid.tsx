@@ -4,7 +4,8 @@ import { useState } from 'react'
 import {
   DndContext,
   closestCenter,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -41,9 +42,15 @@ export function BentoGrid({
   
   const activeGoal = goals.find(g => g.id === activeId)
 
+  // แยก Sensor สำหรับ Mouse และ Touch
+  // Mouse: ลากได้เลยเมื่อขยับ 5px
+  // Touch: ต้องกดค้าง 250ms ก่อนถึงจะลากได้ (ป้องกันการแย่ง scroll)
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
     })
   )
 
