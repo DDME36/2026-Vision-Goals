@@ -51,27 +51,37 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 // Goal CRUD Operations with retry
 export const goalsApi = {
   async getAll(userId: string): Promise<Goal[]> {
-    return withRetry(async () => {
-      // Add timeout for Safari
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+    // ใช้ fetch ตรงๆ แทน Supabase client เพื่อแก้ปัญหา Safari ค้าง
+    const url = `${supabaseUrl}/rest/v1/goals?user_id=eq.${userId}&order=position.asc`
+    
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
+    
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        signal: controller.signal
+      })
       
-      try {
-        const { data, error } = await supabase
-          .from('goals')
-          .select('*')
-          .eq('user_id', userId)
-          .order('position', { ascending: true })
-          .abortSignal(controller.signal)
-        
-        clearTimeout(timeoutId)
-        if (error) throw error
-        return data || []
-      } catch (err) {
-        clearTimeout(timeoutId)
-        throw err
+      clearTimeout(timeoutId)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
-    })
+      
+      const data = await response.json()
+      return data || []
+    } catch (err) {
+      clearTimeout(timeoutId)
+      console.error('goalsApi.getAll error:', err)
+      throw err
+    }
   },
 
   async create(goal: Omit<Goal, 'id' | 'created_at' | 'updated_at'>): Promise<Goal> {
