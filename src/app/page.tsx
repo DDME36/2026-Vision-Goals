@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.1.6'
+const APP_VERSION = '1.1.7'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -112,8 +112,8 @@ export default function Home() {
         if (!newUser) {
           setGoals([])
         }
-        // Force fetch goals when user signs in
-        if (event === 'SIGNED_IN' && newUser) {
+        // Fetch goals when user signs in OR when initial session has user
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && newUser) {
           fetchGoals(newUser.id)
         }
       })
