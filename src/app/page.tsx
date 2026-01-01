@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.2.4'
+const APP_VERSION = '1.2.5'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -116,13 +116,16 @@ export default function Home() {
         // Fetch goals when user signs in OR when initial session has user
         if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && newUser) {
           console.log('Triggering fetchGoals from auth event:', event)
-          fetchGoals(newUser.id).then(() => {
-            console.log('fetchGoals completed, setting loading false')
-            setLoading(false)
-          }).catch(err => {
-            console.error('fetchGoals failed:', err)
-            setLoading(false)
-          })
+          // เพิ่ม delay เล็กน้อยให้ Safari พร้อมก่อน fetch
+          setTimeout(() => {
+            fetchGoals(newUser.id).then(() => {
+              console.log('fetchGoals completed, setting loading false')
+              setLoading(false)
+            }).catch(err => {
+              console.error('fetchGoals failed:', err)
+              setLoading(false)
+            })
+          }, 100)
         }
       })
 
