@@ -76,6 +76,12 @@ input[type="password"]:not(:placeholder-shown) {
   letter-spacing: 0.15em;
 }
 
+/* Goal card touch handling for iOS Safari */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Safe area utilities */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);

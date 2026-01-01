@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react'
 
 export function Countdown() {
+  const [mounted, setMounted] = useState(false)
   const [time, setTime] = useState({ days: 365, hours: 0, minutes: 0, seconds: 0 })
-  const [isYear2026, setIsYear2026] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+    
     const calculate = () => {
       const now = new Date()
       const options: Intl.DateTimeFormatOptions = { 
@@ -25,26 +27,19 @@ export function Countdown() {
         parseInt(hour), parseInt(minute), parseInt(second)
       )
       
-      // ปี 2026 (พ.ศ. 2569)
       const start2026 = new Date(2026, 0, 1, 0, 0, 0)
       const end2026 = new Date(2027, 0, 1, 0, 0, 0)
       
       if (thaiNow < start2026) {
-        // ยังไม่ถึงปี 2026 - ล็อคไว้ที่ 365 วัน 00:00:00
-        setIsYear2026(false)
         setTime({ days: 365, hours: 0, minutes: 0, seconds: 0 })
         return
       }
       
       if (thaiNow >= end2026) {
-        // หมดปี 2026 แล้ว
-        setIsYear2026(true)
         setTime({ days: 0, hours: 0, minutes: 0, seconds: 0 })
         return
       }
       
-      // อยู่ในปี 2026 - นับถอยหลังวันที่เหลือในปี 2026
-      setIsYear2026(true)
       const diff = end2026.getTime() - thaiNow.getTime()
       const days = Math.floor(diff / (1000 * 60 * 60 * 24))
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
@@ -58,6 +53,16 @@ export function Countdown() {
     const interval = setInterval(calculate, 1000)
     return () => clearInterval(interval)
   }, [])
+
+  // Prevent hydration mismatch - show skeleton until mounted
+  if (!mounted) {
+    return (
+      <div className="text-right">
+        <div className="h-7 sm:h-8 lg:h-9 w-32 bg-muted/30 rounded animate-pulse mb-1" />
+        <div className="h-5 sm:h-6 w-20 bg-muted/20 rounded animate-pulse ml-auto" />
+      </div>
+    )
+  }
 
   return (
     <div className="text-right">

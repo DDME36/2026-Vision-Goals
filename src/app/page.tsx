@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.1.3'
+const APP_VERSION = '1.1.4'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -138,18 +138,21 @@ export default function Home() {
   useEffect(() => {
     const handleVisibilityChange = async () => {
       if (document.visibilityState === 'visible' && user) {
-        try {
-          const session = await authApi.ensureValidSession()
-          if (!session) {
-            handleSessionExpired()
-          } else {
-            // Refresh goals data
-            fetchGoals()
+        // เพิ่ม setTimeout เล็กน้อยเพื่อให้ Safari ตื่นตัวเต็มที่
+        setTimeout(async () => {
+          try {
+            const session = await authApi.ensureValidSession()
+            if (!session) {
+              handleSessionExpired()
+            } else {
+              // Refresh goals data
+              fetchGoals(user.id)
+            }
+          } catch (err) {
+            console.error('Session refresh error:', err)
+            // ไม่ต้อง handleSessionExpired ทันที - ให้ลอง refresh อีกครั้ง
           }
-        } catch (err) {
-          console.error('Session refresh error:', err)
-          handleSessionExpired()
-        }
+        }, 300)
       }
     }
 

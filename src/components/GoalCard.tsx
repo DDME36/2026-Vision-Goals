@@ -139,7 +139,11 @@ export function GoalCard({ goal, onToggleStatus, onEdit, onDelete, isDragOverlay
 
         {/* Main Content */}
         <div className="flex items-center gap-3">
-          <button onClick={handleToggle} className="flex-shrink-0 transition-transform hover:scale-110">
+          <button 
+            onClick={handleToggle} 
+            onPointerDown={(e) => e.stopPropagation()}
+            className="flex-shrink-0 transition-transform hover:scale-110 touch-manipulation"
+          >
             {goal.status ? (
               <CheckCircle2 className="w-5 h-5 text-green-500" />
             ) : (
@@ -200,10 +204,18 @@ export function GoalCard({ goal, onToggleStatus, onEdit, onDelete, isDragOverlay
         animate={{ opacity: isHovered && !isDragOverlay ? 1 : 0 }}
         className="absolute right-2 top-2 flex items-center gap-1 bg-card/95 backdrop-blur-sm rounded-lg p-1 shadow-sm border z-20"
       >
-        <button onClick={() => onEdit(goal)} className="p-1.5 rounded-md hover:bg-accent transition-colors">
+        <button 
+          onClick={() => onEdit(goal)} 
+          onPointerDown={(e) => e.stopPropagation()}
+          className="p-1.5 rounded-md hover:bg-accent transition-colors touch-manipulation"
+        >
           <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
-        <button onClick={() => onDelete(goal.id)} className="p-1.5 rounded-md hover:bg-red-50 transition-colors">
+        <button 
+          onClick={() => onDelete(goal.id)} 
+          onPointerDown={(e) => e.stopPropagation()}
+          className="p-1.5 rounded-md hover:bg-red-50 transition-colors touch-manipulation"
+        >
           <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-red-500" />
         </button>
       </motion.div>
