@@ -55,30 +55,51 @@ const timeoutPromise = (ms: number) => {
   )
 }
 
+// Delay helper for retry backoff
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
 // Goal CRUD Operations with retry
 export const goalsApi = {
   async getAll(userId: string): Promise<Goal[]> {
     console.log('goalsApi.getAll: Starting...')
     
-    try {
-      // ใช้ Promise.race แข่งกันระหว่าง "ดึงข้อมูล" กับ "จับเวลา 10 วิ"
-      const result = await Promise.race([
-        supabase
-          .from('goals')
-          .select('*')
-          .eq('user_id', userId)
-          .order('position', { ascending: true }),
-        timeoutPromise(10000)
-      ]) as { data: Goal[] | null; error: any }
-      
-      console.log('goalsApi.getAll: Got response')
-      
-      if (result.error) throw result.error
-      return result.data || []
-    } catch (err) {
-      console.error('goalsApi.getAll error:', err)
-      throw err
+    // ⚙️ ตั้งค่า: ลองใหม่ได้ 3 ครั้ง, แต่ละครั้งให้เวลาแค่ 5 วินาที
+    const MAX_RETRIES = 3
+    const TIMEOUT_MS = 5000
+    
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        console.log(`goalsApi.getAll: Attempt ${attempt}/${MAX_RETRIES}`)
+        
+        // แข่งกันระหว่าง "ดึงข้อมูล" กับ "จับเวลา"
+        const result = await Promise.race([
+          supabase
+            .from('goals')
+            .select('*')
+            .eq('user_id', userId)
+            .order('position', { ascending: true }),
+          timeoutPromise(TIMEOUT_MS)
+        ]) as { data: Goal[] | null; error: any }
+        
+        if (result.error) throw result.error
+        
+        console.log('goalsApi.getAll: Success!')
+        return result.data || []
+      } catch (err: any) {
+        console.warn(`goalsApi.getAll: Attempt ${attempt} failed:`, err?.message)
+        
+        // ถ้าเป็นรอบสุดท้ายแล้ว ยังไม่ได้อีก ให้โยน Error ออกไป
+        if (attempt === MAX_RETRIES) {
+          console.error('goalsApi.getAll: All retries failed.')
+          throw err
+        }
+        
+        // ถ้ายังไม่ครบโควต้า ให้พักแป๊บนึงแล้วลองใหม่ (Backoff Strategy)
+        await delay(attempt * 500)
+      }
     }
+    
+    return [] // กันตาย
   },
 
   async create(goal: Omit<Goal, 'id' | 'created_at' | 'updated_at'>): Promise<Goal> {
