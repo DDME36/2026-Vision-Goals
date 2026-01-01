@@ -170,20 +170,20 @@ export function GoalModal({ open, onOpenChange, goal, onSave }: GoalModalProps) 
           {/* Target Date */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">วันที่ตั้งเป้า (ไม่บังคับ)</label>
-            <div className="relative flex items-center gap-2">
+            <div className="relative flex items-center justify-center">
               <Input
                 type="date"
                 value={targetDate}
                 onChange={(e) => setTargetDate(e.target.value)}
                 min="2026-01-01"
                 max="2026-12-31"
-                className="h-11 w-full appearance-none pr-10 text-center"
+                className="h-11 w-full appearance-none text-center [&::-webkit-datetime-edit]:mx-auto"
               />
               {targetDate && (
                 <button
                   type="button"
                   onClick={() => setTargetDate('')}
-                  className="absolute right-2 p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-2 p-1.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors z-10"
                   aria-label="ล้างวันที่"
                 >
                   <X className="w-4 h-4" />
