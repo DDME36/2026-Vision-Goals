@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { IBM_Plex_Sans_Thai, Sriracha } from 'next/font/google'
 import { Toaster } from 'sonner'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { NetworkStatus } from '@/components/NetworkStatus'
 import './globals.css'
 
 const ibmPlexSansThai = IBM_Plex_Sans_Thai({
@@ -28,7 +30,10 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={`${ibmPlexSansThai.variable} ${sriracha.variable} font-sans antialiased`}>
-        {children}
+        <ErrorBoundary>
+          <NetworkStatus />
+          {children}
+        </ErrorBoundary>
         <Toaster 
           position="bottom-center"
           toastOptions={{

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { withRetry, parseError, ErrorCodes } from './errors'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -29,56 +30,78 @@ export interface User {
   }
 }
 
-// Goal CRUD Operations
+// Health check - verify database connection
+export async function checkDatabaseHealth(): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('goals').select('id').limit(1)
+    return !error
+  } catch {
+    return false
+  }
+}
+
+// Goal CRUD Operations with retry
 export const goalsApi = {
   async getAll(userId: string): Promise<Goal[]> {
-    const { data, error } = await supabase
-      .from('goals')
-      .select('*')
-      .eq('user_id', userId)
-      .order('position', { ascending: true })
-    
-    if (error) throw error
-    return data || []
+    return withRetry(async () => {
+      const { data, error } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('user_id', userId)
+        .order('position', { ascending: true })
+      
+      if (error) throw error
+      return data || []
+    })
   },
 
   async create(goal: Omit<Goal, 'id' | 'created_at' | 'updated_at'>): Promise<Goal> {
-    const { data, error } = await supabase
-      .from('goals')
-      .insert(goal)
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
+    return withRetry(async () => {
+      const { data, error } = await supabase
+        .from('goals')
+        .insert(goal)
+        .select()
+        .single()
+      
+      if (error) throw error
+      return data
+    })
   },
 
   async update(id: string, updates: Partial<Goal>): Promise<Goal> {
-    const { data, error } = await supabase
-      .from('goals')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
-    
-    if (error) throw error
-    return data
+    return withRetry(async () => {
+      const { data, error } = await supabase
+        .from('goals')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+      
+      if (error) throw error
+      return data
+    })
   },
 
   async delete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('goals')
-      .delete()
-      .eq('id', id)
-    
-    if (error) throw error
+    return withRetry(async () => {
+      const { error } = await supabase
+        .from('goals')
+        .delete()
+        .eq('id', id)
+      
+      if (error) throw error
+    })
   },
 
   async updatePositions(goals: { id: string; position: number }[]): Promise<void> {
-    const updates = goals.map(({ id, position }) =>
-      supabase.from('goals').update({ position }).eq('id', id)
-    )
-    await Promise.all(updates)
+    return withRetry(async () => {
+      const updates = goals.map(({ id, position }) =>
+        supabase.from('goals').update({ position }).eq('id', id)
+      )
+      const results = await Promise.all(updates)
+      const error = results.find(r => r.error)?.error
+      if (error) throw error
+    })
   }
 }
 
@@ -160,7 +183,39 @@ export const authApi = {
     return data.session
   },
 
+  async refreshSession() {
+    const { data, error } = await supabase.auth.refreshSession()
+    if (error) throw error
+    return data.session
+  },
+
   onAuthStateChange(callback: (event: string, session: any) => void) {
     return supabase.auth.onAuthStateChange(callback)
+  },
+
+  // Check if session is valid and refresh if needed
+  async ensureValidSession() {
+    try {
+      const session = await this.getSession()
+      if (!session) return null
+      
+      // Check if token is about to expire (within 5 minutes)
+      const expiresAt = session.expires_at
+      if (expiresAt) {
+        const now = Math.floor(Date.now() / 1000)
+        const fiveMinutes = 5 * 60
+        if (expiresAt - now < fiveMinutes) {
+          return await this.refreshSession()
+        }
+      }
+      
+      return session
+    } catch (error) {
+      const appError = parseError(error)
+      if (appError.code === ErrorCodes.SESSION_EXPIRED) {
+        return null
+      }
+      throw appError
+    }
   }
 }

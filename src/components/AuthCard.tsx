@@ -6,6 +6,7 @@ import { Target, User, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-rea
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { authApi } from '@/lib/supabase'
+import { parseError, isOnline, ErrorCodes } from '@/lib/errors'
 
 interface AuthCardProps {
   onSuccess?: () => void
@@ -23,6 +24,13 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
 
   const handleUsernameAuth = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Check network first
+    if (!isOnline()) {
+      setError('ไม่มีการเชื่อมต่ออินเทอร์เน็ต')
+      return
+    }
+    
     setLoading(true)
     setError('')
     setMessage('')
@@ -36,7 +44,9 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
         setMessage('สร้างบัญชีสำเร็จ! เข้าสู่ระบบได้เลย')
         setMode('signin')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const appError = parseError(err)
+      
       // แปลง error message เป็นภาษาไทย
       const errorMessages: Record<string, string> = {
         'Invalid login credentials': 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
@@ -45,14 +55,31 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
         'Password should be at least 6 characters': 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
         'Unable to validate email address: invalid format': 'รูปแบบไม่ถูกต้อง',
       }
-      const thaiError = errorMessages[err.message] || 'เกิดข้อผิดพลาด กรุณาลองใหม่'
-      setError(thaiError)
+      
+      // Check for specific error codes first
+      if (appError.code === ErrorCodes.NETWORK_ERROR) {
+        setError('ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสอบอินเทอร์เน็ต')
+      } else if (appError.code === ErrorCodes.RATE_LIMITED) {
+        setError('คำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่')
+      } else if (appError.code === ErrorCodes.DATABASE_PAUSED) {
+        setError('ระบบกำลังเริ่มต้น กรุณารอสักครู่...')
+      } else {
+        const originalMessage = err instanceof Error ? err.message : ''
+        const thaiError = errorMessages[originalMessage] || appError.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่'
+        setError(thaiError)
+      }
     } finally {
       setLoading(false)
     }
   }
 
   const handleOAuthSignIn = async (provider: 'google' | 'facebook' | 'discord') => {
+    // Check network first
+    if (!isOnline()) {
+      setError('ไม่มีการเชื่อมต่ออินเทอร์เน็ต')
+      return
+    }
+    
     setLoadingProvider(provider)
     setError('')
     try {
@@ -63,13 +90,14 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
       } else if (provider === 'discord') {
         await authApi.signInWithDiscord()
       }
-    } catch (err: any) {
-      const errorMessages: Record<string, string> = {
-        'Invalid login credentials': 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
-        'Unable to validate email address: invalid format': 'รูปแบบไม่ถูกต้อง',
+    } catch (err: unknown) {
+      const appError = parseError(err)
+      
+      if (appError.code === ErrorCodes.NETWORK_ERROR) {
+        setError('ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสอบอินเทอร์เน็ต')
+      } else {
+        setError(appError.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่')
       }
-      const thaiError = errorMessages[err.message] || 'เกิดข้อผิดพลาด กรุณาลองใหม่'
-      setError(thaiError)
       setLoadingProvider(null)
     }
   }

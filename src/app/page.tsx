@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, Sparkles, Target, TrendingUp, CheckCircle, Clock, Filter, Flame, Minus, ArrowDown, Briefcase, Heart, Wallet, User as UserIcon, BookOpen, Tag, X } from 'lucide-react'
+import { Sparkles, Target, TrendingUp, CheckCircle, Clock, Filter, Flame, Minus, ArrowDown, Briefcase, Heart, Wallet, User as UserIcon, BookOpen, Tag, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { User } from '@supabase/supabase-js'
 import { goalsApi, authApi, Goal } from '@/lib/supabase'
+import { parseError, ErrorCodes, isOnline } from '@/lib/errors'
 import { initAudio } from '@/lib/sounds'
 import { AuthCard } from '@/components/AuthCard'
 import { Header } from '@/components/Header'
@@ -47,6 +48,30 @@ export default function Home() {
     { key: 'low', label: 'ไม่เร่งด่วน', icon: ArrowDown, color: 'text-slate-400' },
   ]
 
+  // Handle session expired - redirect to login
+  const handleSessionExpired = () => {
+    setUser(null)
+    setGoals([])
+    toast.error('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่')
+  }
+
+  // Handle API errors with proper messages
+  const handleApiError = (error: unknown, fallbackMessage: string) => {
+    const appError = parseError(error)
+    
+    if (appError.code === ErrorCodes.SESSION_EXPIRED) {
+      handleSessionExpired()
+      return
+    }
+    
+    if (appError.code === ErrorCodes.NETWORK_ERROR && !isOnline()) {
+      // Network status component will show the offline banner
+      return
+    }
+    
+    toast.error(appError.message || fallbackMessage)
+  }
+
   // Auth state listener
   useEffect(() => {
     // Initialize audio on first interaction (for iOS)
@@ -59,7 +84,7 @@ export default function Home() {
     document.addEventListener('click', handleFirstInteraction, { once: true })
 
     try {
-      const { data: { subscription } } = authApi.onAuthStateChange((event, session) => {
+      const { data: { subscription } } = authApi.onAuthStateChange((_event, session) => {
         setUser(session?.user ?? null)
         if (!session?.user) {
           setGoals([])
@@ -67,7 +92,7 @@ export default function Home() {
       })
 
       // Check initial session
-      authApi.getSession().then((session) => {
+      authApi.ensureValidSession().then((session) => {
         setUser(session?.user ?? null)
         setLoading(false)
       }).catch((err) => {
@@ -97,7 +122,7 @@ export default function Home() {
       setLastCompletedCount(data.filter(g => g.status).length)
     } catch (err) {
       console.error('Error fetching goals:', err)
-      toast.error('ไม่สามารถโหลดเป้าหมายได้ กรุณาลองใหม่')
+      handleApiError(err, 'ไม่สามารถโหลดเป้าหมายได้ กรุณาลองใหม่')
     }
   }
 
@@ -159,7 +184,7 @@ export default function Home() {
       }
     } catch (err) {
       console.error('Error saving goal:', err)
-      toast.error('ไม่สามารถบันทึกเป้าหมายได้ กรุณาลองใหม่')
+      handleApiError(err, 'ไม่สามารถบันทึกเป้าหมายได้ กรุณาลองใหม่')
     }
   }
 
@@ -183,7 +208,7 @@ export default function Home() {
     } catch (err) {
       console.error('Error updating goal status:', err)
       setGoals(prevGoals)
-      toast.error('ไม่สามารถอัพเดทสถานะได้')
+      handleApiError(err, 'ไม่สามารถอัพเดทสถานะได้')
     }
   }
 
@@ -221,7 +246,7 @@ export default function Home() {
           } catch (err) {
             console.error('Error deleting goal:', err)
             setGoals(prevGoals)
-            toast.error('ไม่สามารถลบเป้าหมายได้')
+            handleApiError(err, 'ไม่สามารถลบเป้าหมายได้')
           }
         }
       },
@@ -239,7 +264,7 @@ export default function Home() {
     } catch (err) {
       console.error('Error reordering goals:', err)
       setGoals(prevGoals)
-      toast.error('ไม่สามารถจัดลำดับใหม่ได้')
+      handleApiError(err, 'ไม่สามารถจัดลำดับใหม่ได้')
     }
   }
 

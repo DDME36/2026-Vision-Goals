@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ImageCropper } from '@/components/ImageCropper'
 import { supabase } from '@/lib/supabase'
+import { parseError, isOnline, ErrorCodes } from '@/lib/errors'
 
 interface ProfileModalProps {
   open: boolean
@@ -88,6 +89,12 @@ export function ProfileModal({
       return
     }
 
+    // Check network first
+    if (!isOnline()) {
+      setError('ไม่มีการเชื่อมต่ออินเทอร์เน็ต')
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -105,7 +112,16 @@ export function ProfileModal({
       onOpenChange(false)
     } catch (err: unknown) {
       console.error('Update error:', err)
-      setError('บันทึกไม่สำเร็จ กรุณาลองใหม่')
+      const appError = parseError(err)
+      
+      if (appError.code === ErrorCodes.NETWORK_ERROR) {
+        setError('ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสอบอินเทอร์เน็ต')
+      } else if (appError.code === ErrorCodes.SESSION_EXPIRED) {
+        setError('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่')
+        onOpenChange(false)
+      } else {
+        setError('บันทึกไม่สำเร็จ กรุณาลองใหม่')
+      }
     } finally {
       setLoading(false)
     }
