@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.2.6'
+const APP_VERSION = '1.2.7'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -37,6 +37,7 @@ export default function Home() {
   const [filterCategory, setFilterCategory] = useState<string | null>(null)
   const [filterPriority, setFilterPriority] = useState<string | null>(null)
   const deletedGoalRef = useRef<Goal | null>(null)
+  const isFetchingRef = useRef(false) // 🔒 ตัวล็อคป้องกันการ fetch ซ้ำ
 
   // Filter configs
   const categories = [
@@ -106,21 +107,25 @@ export default function Home() {
 
     try {
       const { data: { subscription } } = authApi.onAuthStateChange((event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id)
+        console.log('Auth Event:', event, session?.user?.id)
         const newUser = session?.user ?? null
+        
+        // เช็คว่า User เปลี่ยนจริงไหม? ถ้า User เดิมไม่ต้องทำอะไร
+        if (user?.id === newUser?.id && event === 'INITIAL_SESSION') {
+          console.log('Same user, skipping INITIAL_SESSION')
+          return
+        }
+        
         setUser(newUser)
         if (!newUser) {
           setGoals([])
           setLoading(false)
         }
-        // Fetch goals when user signs in OR when initial session has user
-        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && newUser) {
-          console.log('Triggering fetchGoals from auth event:', event)
-          // เพิ่ม delay เล็กน้อยให้ Safari พร้อมก่อน fetch
-          setTimeout(() => {
-            fetchGoals(newUser.id)
-            // fetchGoals จัดการ setLoading(false) เองใน finally แล้ว
-          }, 100)
+        
+        // ดักจับเฉพาะ Event สำคัญ
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && newUser) {
+          // ไม่ต้อง setTimeout ยาวๆ แล้ว เพราะเรามี isFetchingRef กันไว้
+          fetchGoals(newUser.id)
         }
       })
 
@@ -171,25 +176,34 @@ export default function Home() {
 
   const fetchGoals = async (userId?: string) => {
     const uid = userId || user?.id
-    console.log('fetchGoals called with userId:', uid)
-    if (!uid) {
-      console.log('fetchGoals: No userId, returning')
-      setLoading(false)
+    
+    // ⛔️ ถ้าไม่มี User หรือ "กำลังดึงข้อมูลอยู่" ให้หยุดทันที!
+    if (!uid || isFetchingRef.current) {
+      console.log('fetchGoals: Skipped (Already fetching or no user)')
+      if (!uid) setLoading(false)
       return
     }
     
+    // 🔒 ล็อคประตู!
+    isFetchingRef.current = true
+    console.log('fetchGoals: Locking and Starting...')
+    
     try {
-      console.log('fetchGoals: Calling goalsApi.getAll...')
       const data = await goalsApi.getAll(uid)
-      console.log('fetchGoals: Got data:', data?.length, 'goals')
+      console.log('fetchGoals: Success, got', data?.length, 'goals')
       setGoals(data)
       setLastCompletedCount(data.filter(g => g.status).length)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching goals:', err)
-      handleApiError(err, 'โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่')
+      console.log('Error Message:', err?.message)
+      // ถ้าไม่ใช่ AbortError (การยกเลิกปกติ) ค่อยแจ้งเตือน
+      if (err?.name !== 'AbortError') {
+        handleApiError(err, 'โหลดข้อมูลไม่สำเร็จ')
+      }
     } finally {
-      // ✅ สำคัญมาก: ใส่ finally เพื่อให้ Loading หายไปแน่นอน 100%
-      console.log('fetchGoals finished, force loading false')
+      // 🔓 ปลดล็อคเสมอ (ไม่ว่าจะสำเร็จหรือล้มเหลว)
+      isFetchingRef.current = false
+      console.log('fetchGoals: Unlocked')
       setLoading(false)
     }
   }
