@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.1.7'
+const APP_VERSION = '1.1.8'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -111,10 +111,11 @@ export default function Home() {
         setUser(newUser)
         if (!newUser) {
           setGoals([])
+          setLoading(false)
         }
         // Fetch goals when user signs in OR when initial session has user
-        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && newUser) {
-          fetchGoals(newUser.id)
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') && newUser) {
+          fetchGoals(newUser.id).finally(() => setLoading(false))
         }
       })
 
@@ -160,9 +161,9 @@ export default function Home() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [user])
 
-  // Fetch goals when user changes
+  // Fetch goals when user changes (backup - in case auth event missed)
   useEffect(() => {
-    if (user) {
+    if (user && goals.length === 0) {
       fetchGoals(user.id)
     }
   }, [user])
