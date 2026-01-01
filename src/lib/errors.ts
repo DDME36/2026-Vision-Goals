@@ -37,6 +37,15 @@ export const ErrorMessages: Record<string, string> = {
 
 // Parse Supabase/network errors into AppError
 export function parseError(error: unknown): AppError {
+  // Abort/timeout errors
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    return new AppError(
+      'การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่',
+      ErrorCodes.NETWORK_ERROR,
+      true
+    )
+  }
+
   // Network errors
   if (error instanceof TypeError && error.message.includes('fetch')) {
     return new AppError(

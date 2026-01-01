@@ -21,7 +21,7 @@ import { SkeletonGrid } from '@/components/SkeletonGrid'
 import { FloatingAddButton } from '@/components/FloatingAddButton'
 
 // App version - เปลี่ยนทุกครั้งที่ deploy เพื่อ force reload
-const APP_VERSION = '1.1.9'
+const APP_VERSION = '1.2.0'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)

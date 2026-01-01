@@ -52,14 +52,25 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 export const goalsApi = {
   async getAll(userId: string): Promise<Goal[]> {
     return withRetry(async () => {
-      const { data, error } = await supabase
-        .from('goals')
-        .select('*')
-        .eq('user_id', userId)
-        .order('position', { ascending: true })
+      // Add timeout for Safari
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
       
-      if (error) throw error
-      return data || []
+      try {
+        const { data, error } = await supabase
+          .from('goals')
+          .select('*')
+          .eq('user_id', userId)
+          .order('position', { ascending: true })
+          .abortSignal(controller.signal)
+        
+        clearTimeout(timeoutId)
+        if (error) throw error
+        return data || []
+      } catch (err) {
+        clearTimeout(timeoutId)
+        throw err
+      }
     })
   },
 
