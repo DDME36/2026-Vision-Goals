@@ -350,9 +350,38 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
       const goalsToRender = goals.filter(g => selectedGoals.includes(g.id))
       drawPoster(canvas, 1, goalsToRender, cachedAvatarRef.current)
       
+      const fileName = `2026-goals-${userName}.png`
+      
+      // ลองใช้ Web Share API ก่อน (สำหรับ PWA/มือถือ)
+      if (navigator.share && navigator.canShare) {
+        try {
+          const blob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob(b => b ? resolve(b) : reject(new Error('Failed to create blob')), 'image/png', 1)
+          })
+          
+          const file = new File([blob], fileName, { type: 'image/png' })
+          
+          // เช็คว่า device รองรับการแชร์ไฟล์ไหม
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'เป้าหมายปี 2026',
+            })
+            return // สำเร็จแล้ว ไม่ต้อง fallback
+          }
+        } catch (shareErr) {
+          // ถ้า user cancel หรือ share ไม่ได้ ให้ fallback ไปดาวน์โหลดปกติ
+          if ((shareErr as Error).name === 'AbortError') {
+            return // user cancel ไม่ต้องทำอะไร
+          }
+          console.log('Web Share not available, falling back to download')
+        }
+      }
+      
+      // Fallback: ดาวน์โหลดแบบปกติ
       const dataUrl = canvas.toDataURL('image/png', 1)
       const link = document.createElement('a')
-      link.download = `2026-goals-${userName}.png`
+      link.download = fileName
       link.href = dataUrl
       link.click()
     } catch (err) {
@@ -447,7 +476,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
               </div>
             </div>
 
-            {/* Download Button */}
+            {/* Save/Share Button */}
             <Button 
               onClick={downloadPoster} 
               disabled={isGenerating || selectedGoals.length === 0}
@@ -458,7 +487,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar }:
               ) : (
                 <>
                   <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                  ดาวน์โหลด Poster
+                  บันทึก Poster
                 </>
               )}
             </Button>
