@@ -1,0 +1,18 @@
+{
+  "name": "2026 Vision Board",
+  "short_name": "2026 Goals",
+  "description": "จดบันทึกและติดตามเป้าหมายของคุณในปี 2026",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#3d3833",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

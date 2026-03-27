@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 96%;
+    --foreground: 20 10% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 10% 15%;
+    --primary: 20 10% 20%;
+    --primary-foreground: 40 20% 98%;
+    --secondary: 40 15% 92%;
+    --secondary-foreground: 20 10% 20%;
+    --muted: 40 15% 90%;
+    --muted-foreground: 20 10% 45%;
+    --accent: 40 15% 88%;
+    --accent-foreground: 20 10% 20%;
+    --border: 40 15% 85%;
+    --ring: 20 10% 30%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    /* ป้องกัน text zoom บน iOS */
+    -webkit-text-size-adjust: 100%;
+  }
+  html {
+    /* ไม่ใช้ overscroll-behavior: none เพราะทำให้ iOS scroll แข็งๆ */
+    /* ไม่ใช้ touch-action: manipulation ทั้งหน้า เพราะจะไปขัดกับ dnd-kit */
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Safe area for notch devices */
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    /* iOS smooth scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent overscroll bounce causing UI shake */
+    overscroll-behavior-y: none;
+    /* Prevent text selection globally */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* Allow text selection in inputs/textareas for editing */
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  /* ป้องกัน iOS zoom เมื่อ focus input (font-size < 16px) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 44px;
+    display: flex;
+    justify-content: center;
+  }
+  /* Center date input text */
+  input[type="date"]::-webkit-datetime-edit {
+    text-align: center;
+  }
+  input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    text-align: center;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 12px;
+  }
+  @media (min-width: 640px) {
+    input, select, textarea {
+      font-size: inherit !important;
+    }
+  }
+}
+
+/* Password input - use Verdana for bigger dots when typing */
+input[type="password"]:not(:placeholder-shown) {
+  font-family: Verdana, sans-serif;
+  letter-spacing: 0.15em;
+}
+
+/* Goal card touch handling for iOS Safari */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area utilities */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Paper texture background - simplified for mobile */
+.paper-texture {
+  background-color: hsl(40 20% 96%);
+}
+
+@media (min-width: 640px) {
+  .paper-texture {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-blend-mode: soft-light;
+    background-size: 200px 200px;
+  }
+}
+
+/* Strikethrough animation */
+.strikethrough-animation {
+  position: relative;
+}
+
+.strikethrough-animation::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.4s ease-out;
+}
+
+.strikethrough-animation.completed::after {
+  width: 100%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(40 15% 80%);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(40 15% 70%);
+}
+
+/* Shimmer skeleton loading effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(40 15% 90%) 25%,
+    hsl(40 15% 95%) 50%,
+    hsl(40 15% 90%) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Animated empty state */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
