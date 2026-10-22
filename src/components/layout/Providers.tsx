@@ -14,9 +14,9 @@ function ThemedToaster() {
       offset={24}
       toastOptions={{
         classNames: {
-          toast: '!rounded-2xl !border !border-border !bg-card !text-foreground !shadow-xl !font-sans',
-          description: '!text-muted-foreground',
-          actionButton: '!rounded-lg !bg-primary !text-primary-foreground',
+          toast: 'rounded-2xl! border! border-border! bg-card! text-foreground! shadow-xl! font-sans!',
+          description: 'text-muted-foreground!',
+          actionButton: 'rounded-lg! bg-primary! text-primary-foreground!',
         },
       }}
     />

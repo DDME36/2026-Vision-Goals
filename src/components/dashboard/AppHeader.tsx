@@ -107,7 +107,7 @@ export function AppHeader(props: AppHeaderProps) {
                 aria-label="เมนูบัญชี"
               >
                 <Avatar name={user.displayName} src={user.avatarUrl} />
-                <span className="hidden max-w-[10rem] truncate text-sm font-medium sm:block">{user.displayName}</span>
+                <span className="hidden max-w-40 truncate text-sm font-medium sm:block">{user.displayName}</span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">

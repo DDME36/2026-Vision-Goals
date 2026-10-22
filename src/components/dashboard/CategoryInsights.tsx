@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { getCategory } from '@/lib/constants'
 import { categoryBreakdown } from '@/lib/goals'
 import type { Goal } from '@/lib/types'

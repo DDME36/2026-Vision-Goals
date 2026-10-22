@@ -7,14 +7,14 @@ import './globals.css'
 const sans = IBM_Plex_Sans_Thai({
   subsets: ['thai', 'latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-sans',
+  variable: '--font-plex',
   display: 'swap',
 })
 
 const display = Sriracha({
   subsets: ['thai', 'latin'],
   weight: ['400'],
-  variable: '--font-display',
+  variable: '--font-sriracha',
   display: 'swap',
 })
 

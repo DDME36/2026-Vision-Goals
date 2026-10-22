@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { Wifi, WifiOff } from 'lucide-react'
 
 export function NetworkStatus() {
@@ -41,7 +41,7 @@ export function NetworkStatus() {
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -40, opacity: 0 }}
-          className="fixed inset-x-0 top-[max(env(safe-area-inset-top),0.75rem)] z-[60] flex justify-center px-4"
+          className="fixed inset-x-0 top-[max(env(safe-area-inset-top),0.75rem)] z-60 flex justify-center px-4"
         >
           <div
             className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white shadow-lg ${

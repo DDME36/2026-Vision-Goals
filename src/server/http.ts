@@ -1,6 +1,6 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { ZodError, type ZodType, type ZodTypeDef } from 'zod'
+import { ZodError, type ZodType } from 'zod'
 import { getCurrentUser } from '@/server/auth/session'
 import type { AppUser } from '@/lib/types'
 
@@ -17,7 +17,7 @@ export class ApiError extends Error {
 
 export const json = <T>(data: T, init?: ResponseInit) => NextResponse.json(data, init)
 
-export async function readJson<T>(request: Request, schema: ZodType<T, ZodTypeDef, unknown>): Promise<T> {
+export async function readJson<T>(request: Request, schema: ZodType<T>): Promise<T> {
   let body: unknown
   try {
     body = await request.json()

@@ -92,7 +92,7 @@ export function HeroSection({ year, years, onYearChange, stats, loading }: HeroS
         <p className="text-sm font-medium text-muted-foreground">{now ? greeting(now) : ' '}</p>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">เป้าหมายปี</h1>
-          <div className="flex items-center rounded-2xl border bg-card shadow-sm">
+          <div className="flex items-center rounded-2xl border bg-card shadow-xs">
             <button
               onClick={() => onYearChange(year - 1)}
               className="rounded-l-2xl p-2.5 text-muted-foreground hover:text-foreground"
@@ -101,11 +101,11 @@ export function HeroSection({ year, years, onYearChange, stats, loading }: HeroS
               <ChevronLeft className="size-4" />
             </button>
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 px-1 font-display text-3xl text-brand outline-none sm:text-4xl">
+              <DropdownMenuTrigger className="flex items-center gap-1 px-1 font-display text-3xl text-brand outline-hidden sm:text-4xl">
                 {year}
                 <ChevronDown className="size-4 text-muted-foreground" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="min-w-[8rem]">
+              <DropdownMenuContent align="center" className="min-w-32">
                 <DropdownMenuRadioGroup value={String(year)} onValueChange={(v) => onYearChange(Number(v))}>
                   {years.map((y) => (
                     <DropdownMenuRadioItem key={y} value={String(y)}>

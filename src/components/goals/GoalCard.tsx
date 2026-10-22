@@ -3,7 +3,7 @@
 import { memo, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import {
   CalendarClock,
   Check,
@@ -49,7 +49,7 @@ const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
 function Description({ text, className }: { text: string; className?: string }) {
   return (
-    <p className={cn('whitespace-pre-line break-words text-sm text-muted-foreground', className)}>
+    <p className={cn('whitespace-pre-line wrap-break-word text-sm text-muted-foreground', className)}>
       {extractLinks(text).map((part, i) =>
         /^https?:\/\//.test(part) ? (
           <a
@@ -149,7 +149,7 @@ function GoalCardInner({ goal, variant, sortable, overlay, ...actions }: GoalCar
         goal.status && 'bg-card/60',
       )}
     >
-      {goal.priority === 'high' && !goal.status && <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-red-500 to-orange-400" />}
+      {goal.priority === 'high' && !goal.status && <span className="absolute inset-y-0 left-0 w-1 bg-linear-to-b from-red-500 to-orange-400" />}
       <Burst trigger={burst} />
 
       <div className={cn('flex gap-3', isList ? 'items-center' : 'items-start')}>
@@ -301,7 +301,7 @@ function GoalCardInner({ goal, variant, sortable, overlay, ...actions }: GoalCar
                             >
                               {s.completed && <Check className="size-3" strokeWidth={3} />}
                             </span>
-                            <span className={cn('break-words', s.completed && 'text-muted-foreground line-through')}>{s.title}</span>
+                            <span className={cn('wrap-break-word', s.completed && 'text-muted-foreground line-through')}>{s.title}</span>
                           </button>
                         </li>
                       ))}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Trophy, X } from 'lucide-react'
 import { playCelebrationSound } from '@/lib/sounds'
 
@@ -85,7 +85,7 @@ export function CelebrationEffect({ show, year, onDone }: CelebrationEffectProps
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/20 backdrop-blur-xs"
           />
         )}
       </AnimatePresence>
@@ -158,7 +158,7 @@ export function CelebrationEffect({ show, year, onDone }: CelebrationEffectProps
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
                 transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-                className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center"
+                className="w-20 h-20 mx-auto mb-4 rounded-full bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center"
               >
                 <Trophy className="w-10 h-10 text-white" />
               </motion.div>

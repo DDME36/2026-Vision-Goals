@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { AlarmClock, CheckCircle2, Flame, Target } from 'lucide-react'
 import type { GoalStats } from '@/lib/goals'
 import { cn } from '@/lib/utils'

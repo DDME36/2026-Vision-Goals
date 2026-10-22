@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { CheckCircle2, MessageSquareHeart, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { api, errorMessage } from '@/lib/api-client'

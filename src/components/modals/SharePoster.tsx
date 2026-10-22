@@ -448,7 +448,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar, y
                     )}
                   >
                     <div className={cn(
-                      'w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
+                      'w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center shrink-0',
                       selectedGoals.includes(goal.id) 
                         ? 'border-primary bg-primary' 
                         : 'border-muted-foreground'
@@ -466,7 +466,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar, y
                       </p>
                     </div>
                     {goal.status && (
-                      <span className="text-[10px] sm:text-xs text-green-600 bg-green-50 px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0">
+                      <span className="text-[10px] sm:text-xs text-green-600 bg-green-50 px-1.5 sm:px-2 py-0.5 rounded-full shrink-0">
                         สำเร็จ
                       </span>
                     )}
@@ -497,7 +497,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar, y
 
             {/* Mobile Preview - Small */}
             <div className="md:hidden flex justify-center">
-              <div className="w-[140px] aspect-[9/16] rounded-xl overflow-hidden shadow-lg bg-muted">
+              <div className="w-[140px] aspect-9/16 rounded-xl overflow-hidden shadow-lg bg-muted">
                 <canvas 
                   ref={mobileCanvasRef}
                   width={324}
@@ -511,7 +511,7 @@ export function SharePoster({ open, onOpenChange, goals, userName, userAvatar, y
           {/* Right: Preview - Desktop only */}
           <div className="hidden md:flex flex-col items-center">
             <label className="text-sm font-medium mb-3 block self-start">ตัวอย่าง</label>
-            <div className="w-full max-w-[320px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl bg-muted">
+            <div className="w-full max-w-[320px] aspect-9/16 rounded-2xl overflow-hidden shadow-2xl bg-muted">
               <canvas 
                 ref={desktopCanvasRef}
                 width={432}

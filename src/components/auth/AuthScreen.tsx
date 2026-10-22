@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { ArrowRight, Check, Eye, EyeOff, HardDrive, Lock, Sparkles, Target, TrendingUp, User } from 'lucide-react'
 import { api, errorMessage } from '@/lib/api-client'
 import { LIMITS } from '@/lib/config'
@@ -102,7 +102,7 @@ export function AuthScreen({ allowRegistration, onAuthenticated, onGuest }: Auth
                 transition={{ delay: 0.15 + i * 0.08 }}
                 className="flex items-start gap-4"
               >
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border bg-card shadow-sm">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border bg-card shadow-xs">
                   <Icon className="size-5 text-brand" />
                 </span>
                 <span>
@@ -138,7 +138,7 @@ export function AuthScreen({ allowRegistration, onAuthenticated, onGuest }: Auth
                 <motion.span
                   layout
                   transition={{ type: 'spring', stiffness: 400, damping: 34 }}
-                  className={cn('absolute inset-y-1 w-[calc(50%-4px)] rounded-lg bg-card shadow-sm', isSignup ? 'left-[calc(50%+0px)]' : 'left-1')}
+                  className={cn('absolute inset-y-1 w-[calc(50%-4px)] rounded-lg bg-card shadow-xs', isSignup ? 'left-[calc(50%+0px)]' : 'left-1')}
                 />
                 {(['signin', 'signup'] as const).map((m) => (
                   <button

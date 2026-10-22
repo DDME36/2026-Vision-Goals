@@ -43,7 +43,7 @@ export const updateGoalSchema = z
   .refine((v) => Object.keys(v).length > 0, 'ไม่มีข้อมูลที่จะอัปเดต')
 
 export const reorderSchema = z.object({
-  ids: z.array(z.string().uuid()).min(1).max(1000),
+  ids: z.array(z.uuid()).min(1).max(1000),
 })
 
 /** Lenient schema for imported goals (from older exports or the guest mode). */
@@ -60,7 +60,7 @@ export const importGoalSchema = z.object({
     .nullish()
     .transform((v) => (v && /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : null)),
   subtasks: z.array(subtaskSchema).max(LIMITS.subtasks).catch([]),
-  created_at: z.string().datetime({ offset: true }).optional().catch(undefined),
+  created_at: z.iso.datetime({ offset: true }).optional().catch(undefined),
 })
 
 export const importSchema = z.object({

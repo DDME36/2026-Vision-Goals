@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { HardDrive, Plus, RefreshCw, ServerCrash } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Features } from '@/components/App'

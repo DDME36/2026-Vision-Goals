@@ -45,7 +45,7 @@ export const Toolbar = forwardRef<HTMLInputElement, ToolbarProps>(function Toolb
             onChange={(e) => set({ query: e.target.value })}
             onKeyDown={(e) => e.key === 'Escape' && (set({ query: '' }), e.currentTarget.blur())}
             placeholder="ค้นหาเป้าหมาย งานย่อย หรือรายละเอียด…"
-            className="h-11 w-full rounded-xl border bg-card pl-10 pr-10 text-sm shadow-sm transition-[border-color,box-shadow] placeholder:text-muted-foreground/70 focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/15"
+            className="h-11 w-full rounded-xl border bg-card pl-10 pr-10 text-sm shadow-xs transition-[border-color,box-shadow] placeholder:text-muted-foreground/70 focus:border-ring focus:outline-hidden focus:ring-4 focus:ring-ring/15"
             aria-label="ค้นหาเป้าหมาย"
           />
           {filters.query ? (
@@ -62,7 +62,7 @@ export const Toolbar = forwardRef<HTMLInputElement, ToolbarProps>(function Toolb
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex flex-1 rounded-xl border bg-card p-1 shadow-sm sm:flex-none" role="tablist" aria-label="สถานะ">
+          <div className="flex flex-1 rounded-xl border bg-card p-1 shadow-xs sm:flex-none" role="tablist" aria-label="สถานะ">
             {STATUS_FILTERS.map((s) => (
               <button
                 key={s.key}
@@ -81,7 +81,7 @@ export const Toolbar = forwardRef<HTMLInputElement, ToolbarProps>(function Toolb
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="shrink-0 shadow-sm" aria-label="เรียงลำดับ">
+              <Button variant="outline" size="icon" className="shrink-0 shadow-xs" aria-label="เรียงลำดับ">
                 <ArrowUpDown />
               </Button>
             </DropdownMenuTrigger>
@@ -97,7 +97,7 @@ export const Toolbar = forwardRef<HTMLInputElement, ToolbarProps>(function Toolb
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex rounded-xl border bg-card p-1 shadow-sm">
+          <div className="flex rounded-xl border bg-card p-1 shadow-xs">
             {(
               [
                 ['grid', LayoutGrid, 'มุมมองการ์ด'],

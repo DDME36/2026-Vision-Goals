@@ -22,8 +22,13 @@
 
 ## Tech stack
 
-Next.js 16 (App Router, standalone output) · React 19 · TypeScript · Tailwind CSS · Framer Motion · dnd-kit · Radix UI
-PostgreSQL 16 · Drizzle ORM · Zod
+| ส่วน | เวอร์ชัน |
+| --- | --- |
+| Runtime | Node.js 24 LTS |
+| Framework | Next.js 16.4 (App Router, standalone output) · React 19.3 |
+| ภาษา / ตรวจโค้ด | TypeScript 6.0 · ESLint 10 |
+| UI | Tailwind CSS 4.3 (CSS-first config) · Motion 14 · Radix UI · lucide-react 1.x · dnd-kit |
+| Data | PostgreSQL 16 · Drizzle ORM 0.45 · Zod 4 |
 
 ```
 src/

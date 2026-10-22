@@ -13,7 +13,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { Plus, SearchX, Sparkles } from 'lucide-react'
 import type { Goal } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -109,8 +109,8 @@ export function GoalBoard({ goals, loading, view, canReorder, filtering, year, o
           <button
             onClick={onAdd}
             className={cn(
-              'flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-sm font-medium text-muted-foreground transition-colors hover:border-brand/50 hover:bg-brand/[0.04] hover:text-brand',
-              view === 'grid' ? 'min-h-[7.5rem]' : 'py-3',
+              'flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-sm font-medium text-muted-foreground transition-colors hover:border-brand/50 hover:bg-brand/4 hover:text-brand',
+              view === 'grid' ? 'min-h-30' : 'py-3',
             )}
           >
             <Plus className="size-4" />

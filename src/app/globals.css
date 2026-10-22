@@ -1,6 +1,113 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Dark mode follows the `.dark` class set by next-themes. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+  max-width: 1280px;
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+}
+
+/* Design tokens live as HSL channels in :root/.dark (below) and are exposed to Tailwind here. */
+@theme inline {
+  --font-sans: var(--font-plex), system-ui, sans-serif;
+  --font-display: var(--font-sriracha), var(--font-plex), cursive;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-brand: hsl(var(--brand));
+  --color-brand-foreground: hsl(var(--brand-foreground));
+  --color-success: hsl(var(--success));
+  --color-danger: hsl(var(--danger));
+  --color-border: hsl(var(--border));
+  --color-ring: hsl(var(--ring));
+
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-sm: calc(var(--radius) - 6px);
+
+  --animate-float: float 4s ease-in-out infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+}
+
+@utility app-backdrop {
+  /* Soft ambient background: paper grain + warm glow. */
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(
+      60rem 30rem at 85% -10%,
+      hsl(var(--brand) / 0.09),
+      transparent 60%
+    ),
+    radial-gradient(
+      40rem 24rem at -10% 10%,
+      hsl(var(--brand) / 0.05),
+      transparent 60%
+    );
+  background-attachment: fixed;
+}
+
+@utility surface {
+  @apply rounded-2xl border bg-card text-card-foreground;
+  box-shadow:
+    0 1px 2px hsl(var(--shadow-color) / 0.04),
+    0 4px 16px -6px hsl(var(--shadow-color) / 0.06);
+}
+
+@utility surface-hover {
+  @apply transition-[box-shadow,transform,border-color] duration-200;
+  &:hover {
+    border-color: hsl(var(--foreground) / 0.14);
+    box-shadow:
+      0 1px 2px hsl(var(--shadow-color) / 0.05),
+      0 12px 32px -12px hsl(var(--shadow-color) / 0.16);
+  }
+}
+
+@utility chip {
+  @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors;
+}
+
+@utility kbd {
+  @apply inline-flex h-5 min-w-5 items-center justify-center rounded border bg-muted px-1 font-sans text-[10px] font-semibold text-muted-foreground;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
 
 @layer base {
   :root {
@@ -93,58 +200,6 @@
   }
   .dark input[type='date']::-webkit-calendar-picker-indicator {
     filter: invert(1);
-  }
-}
-
-@layer components {
-  /* Soft ambient background: paper grain + warm glow. */
-  .app-backdrop {
-    background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(60rem 30rem at 85% -10%, hsl(var(--brand) / 0.09), transparent 60%),
-      radial-gradient(40rem 24rem at -10% 10%, hsl(var(--brand) / 0.05), transparent 60%);
-    background-attachment: fixed;
-  }
-
-  .surface {
-    @apply rounded-2xl border bg-card text-card-foreground;
-    box-shadow:
-      0 1px 2px hsl(var(--shadow-color) / 0.04),
-      0 4px 16px -6px hsl(var(--shadow-color) / 0.06);
-  }
-
-  .surface-hover {
-    @apply transition-[box-shadow,transform,border-color] duration-200;
-  }
-  .surface-hover:hover {
-    border-color: hsl(var(--foreground) / 0.14);
-    box-shadow:
-      0 1px 2px hsl(var(--shadow-color) / 0.05),
-      0 12px 32px -12px hsl(var(--shadow-color) / 0.16);
-  }
-
-  .chip {
-    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors;
-  }
-
-  .kbd {
-    @apply inline-flex h-5 min-w-5 items-center justify-center rounded border bg-muted px-1 font-sans text-[10px] font-semibold text-muted-foreground;
-  }
-
-  .scrollbar-none {
-    scrollbar-width: none;
-  }
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-@layer utilities {
-  .safe-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 0px);
-  }
-  .text-balance {
-    text-wrap: balance;
   }
 }
 

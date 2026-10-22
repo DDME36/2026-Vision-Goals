@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AnimatePresence, Reorder } from 'framer-motion'
+import { AnimatePresence, Reorder } from 'motion/react'
 import { GripVertical, Plus, Target, X } from 'lucide-react'
 import { CATEGORIES, LIMITS, PRIORITIES } from '@/lib/constants'
 import type { Goal, GoalInput, Priority, SubTask } from '@/lib/types'
@@ -226,7 +226,7 @@ export function GoalModal({ open, onOpenChange, goal, year, onSave }: GoalModalP
                     <input
                       value={s.title}
                       onChange={(e) => updateSubtask(s.id, { title: e.target.value.slice(0, LIMITS.subtaskTitle) })}
-                      className={cn('min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none', s.completed && 'text-muted-foreground line-through')}
+                      className={cn('min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-hidden', s.completed && 'text-muted-foreground line-through')}
                     />
                     <button
                       type="button"
