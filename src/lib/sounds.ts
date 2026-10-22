@@ -2,31 +2,38 @@
 
 let audioContext: AudioContext | null = null
 
+const MUTE_KEY = 'vg-sound-muted'
+
+export function isSoundMuted() {
+  try {
+    return localStorage.getItem(MUTE_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+export function setSoundMuted(muted: boolean) {
+  try {
+    localStorage.setItem(MUTE_KEY, String(muted))
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 function getAudioContext() {
+  if (isSoundMuted()) return null
   try {
     if (!audioContext && typeof window !== 'undefined') {
-      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
     }
     // Resume audio context if suspended (required for iOS Safari)
     if (audioContext && audioContext.state === 'suspended') {
       audioContext.resume()
     }
     return audioContext
-  } catch (e) {
+  } catch {
     console.warn('Web Audio API not supported')
     return null
-  }
-}
-
-// Initialize audio context on first user interaction (for iOS)
-export function initAudio() {
-  try {
-    const ctx = getAudioContext()
-    if (ctx && ctx.state === 'suspended') {
-      ctx.resume()
-    }
-  } catch (e) {
-    // Silent fail
   }
 }
 
@@ -52,7 +59,7 @@ export function playCheckSound() {
     oscillator.type = 'sine'
     oscillator.start(ctx.currentTime)
     oscillator.stop(ctx.currentTime + 0.15)
-  } catch (e) {
+  } catch {
     // Silent fail - sound is not critical
   }
 }
@@ -78,7 +85,7 @@ export function playUncheckSound() {
     oscillator.type = 'sine'
     oscillator.start(ctx.currentTime)
     oscillator.stop(ctx.currentTime + 0.1)
-  } catch (e) {
+  } catch {
     // Silent fail
   }
 }
@@ -110,7 +117,7 @@ export function playCelebrationSound() {
       oscillator.start(startTime)
       oscillator.stop(startTime + 0.4)
     })
-  } catch (e) {
+  } catch {
     // Silent fail
   }
 }

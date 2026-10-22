@@ -1,77 +1,55 @@
 import type { Metadata, Viewport } from 'next'
 import { IBM_Plex_Sans_Thai, Sriracha } from 'next/font/google'
-import { Toaster } from 'sonner'
-import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { NetworkStatus } from '@/components/NetworkStatus'
+import { Providers } from '@/components/layout/Providers'
+import { APP_NAME, BRAND } from '@/lib/config'
 import './globals.css'
 
-const ibmPlexSansThai = IBM_Plex_Sans_Thai({
+const sans = IBM_Plex_Sans_Thai({
   subsets: ['thai', 'latin'],
-  weight: ['500'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-sans',
+  display: 'swap',
 })
 
-const sriracha = Sriracha({
+const display = Sriracha({
   subsets: ['thai', 'latin'],
   weight: ['400'],
   variable: '--font-display',
+  display: 'swap',
 })
 
+const description = 'ตั้งเป้าหมาย แตกเป็นขั้นตอนย่อย และติดตามความคืบหน้าตลอดทั้งปี'
+
 export const metadata: Metadata = {
-  title: '2026 Vision Board | เป้าหมายปี 2026',
-  description: 'จดบันทึกและติดตามเป้าหมายของคุณในปี 2026',
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: '2026 Goals',
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  icons: {
-    icon: '/icon.svg',
-    apple: '/icon.svg',
-  },
+  metadataBase: process.env.APP_URL ? new URL(process.env.APP_URL) : undefined,
+  title: { default: `${APP_NAME} — เป้าหมายประจำปีของคุณ`, template: `%s · ${APP_NAME}` },
+  description,
+  applicationName: APP_NAME,
+  authors: [{ name: BRAND }],
+  creator: BRAND,
+  publisher: BRAND,
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: APP_NAME },
+  formatDetection: { telephone: false },
+  icons: { icon: '/icon.svg', apple: '/icon.svg' },
+  openGraph: { title: APP_NAME, description, siteName: APP_NAME, type: 'website', locale: 'th_TH' },
+  robots: { index: false, follow: false },
 }
 
-// Viewport config สำหรับ iOS - ป้องกัน zoom อัตโนมัติเมื่อ focus input และตั้งค่า PWA theme color
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#3d3833',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#faf8f4' },
+    { media: '(prefers-color-scheme: dark)', color: '#110f0e' },
+  ],
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th">
-      <head>
-        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-        <meta httpEquiv="Pragma" content="no-cache" />
-        <meta httpEquiv="Expires" content="0" />
-      </head>
-      <body className={`${ibmPlexSansThai.variable} ${sriracha.variable} font-sans antialiased`}>
-        <ErrorBoundary>
-          <NetworkStatus />
-          {children}
-        </ErrorBoundary>
-        <Toaster 
-          position="bottom-center"
-          toastOptions={{
-            style: {
-              background: 'hsl(0 0% 100%)',
-              border: '1px solid hsl(40 15% 85%)',
-              color: 'hsl(20 10% 15%)',
-            },
-          }}
-        />
+    <html lang="th" suppressHydrationWarning>
+      <body className={`${sans.variable} ${display.variable} min-h-dvh font-sans antialiased`}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

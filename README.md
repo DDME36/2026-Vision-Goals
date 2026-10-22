@@ -1,67 +1,87 @@
-# 2026 Vision Board
+# Vision Goals — by Zentyr
 
-A beautiful, minimalist goal tracker for your 2026 aspirations. Built with Next.js 14, Tailwind CSS, Framer Motion, and Supabase.
+แอปตั้งเป้าหมายประจำปีแบบ self-hosted: วางเป้าหมาย แตกเป็นขั้นตอนย่อย และติดตามความคืบหน้าตลอดทั้งปี
+ข้อมูลทั้งหมดเก็บอยู่ใน PostgreSQL บนเซิร์ฟเวอร์ของคุณเอง
 
-## Features
+## ฟีเจอร์
 
-- Aesthetic minimalist design with paper texture background
-- Drag and drop Bento Grid layout
-- Google and Email authentication
-- Monochrome confetti celebration on goal completion
-- Handwritten font for goal titles
-- Fully responsive design
+- **บัญชีผู้ใช้ของตัวเอง** — สมัคร/ล็อกอินด้วย username + password (scrypt hash, session cookie แบบ httpOnly, rate limit)
+- **โหมดผู้เยี่ยมชม** — ใช้ได้โดยไม่ต้องสมัคร (เก็บใน browser) แล้วย้ายขึ้นบัญชีได้ในคลิกเดียว
+- **เป้าหมายหลายปี** — สลับปีได้ ยกยอดเป้าหมายที่ยังไม่เสร็จไปปีถัดไป
+- **ขั้นตอนย่อย** — ติ๊กทีละขั้น จัดลำดับได้ ครบทุกขั้นแล้วเป้าหมายสำเร็จอัตโนมัติ
+- **Dashboard** — ความคืบหน้ารวม (รวมงานย่อย), เทียบกับเวลาของปีที่ผ่านไป (นำหน้า/ตามแผน/ช้ากว่า), สรุปตามหมวดหมู่, นับถอยหลังสิ้นปี
+- **กำหนดเสร็จ** — แจ้ง “ใกล้ถึงกำหนด” และ “เลยกำหนด”
+- **ค้นหา / กรอง / เรียงลำดับ** — ตามสถานะ หมวดหมู่ ความสำคัญ; มุมมองการ์ดหรือรายการ; ลากวางจัดลำดับ
+- **ลบแล้วเลิกทำได้**, ทำสำเนาเป้าหมาย
+- **โปสเตอร์แชร์** ขนาด IG Story (1080×1920) 4 ธีม
+- **โหมดมืด/สว่าง/ตามระบบ**, คีย์ลัด (`N` เพิ่ม, `/` ค้นหา, `[` `]` เปลี่ยนปี, `?` ดูทั้งหมด), เปิด/ปิดเสียงเอฟเฟกต์
+- **Export / Import JSON** ใช้ได้ทั้งบัญชีและโหมดผู้เยี่ยมชม (นำเข้าซ้ำได้ ระบบข้ามรายการซ้ำ)
+- **โปรไฟล์** — ชื่อ, รูป (ครอปในเครื่อง), เปลี่ยนรหัสผ่าน (ออกจากระบบอุปกรณ์อื่นอัตโนมัติ)
+- **Feedback** ส่งเข้า Discord (ซ่อนอัตโนมัติถ้าไม่ได้ตั้งค่า)
+- PWA manifest, security headers, health check endpoint `/api/health`
 
-## Tech Stack
+## Tech stack
 
-- **Framework:** Next.js 14 (App Router)
-- **Styling:** Tailwind CSS
-- **Animation:** Framer Motion
-- **Drag & Drop:** @dnd-kit
-- **Icons:** Lucide React
-- **Backend/Auth:** Supabase
+Next.js 16 (App Router, standalone output) · React 19 · TypeScript · Tailwind CSS · Framer Motion · dnd-kit · Radix UI
+PostgreSQL 16 · Drizzle ORM · Zod
 
-## Setup
+```
+src/
+  app/            หน้าเว็บ + API routes (/api/auth, /api/goals, /api/profile, /api/health, /api/feedback)
+  server/         โค้ดฝั่ง server เท่านั้น: db (schema, migrate), auth (session, password), http helpers
+  lib/            โค้ดที่ใช้ร่วมกัน: types, validation (zod), goals logic, repositories (remote/local)
+  hooks/          useGoals (optimistic updates + undo), useHotkeys, usePersistentState
+  components/     ui (primitives), dashboard, goals, modals, auth, layout, effects
+drizzle/          SQL migrations (รันอัตโนมัติตอน server เริ่ม)
+```
 
-### 1. Install Dependencies
+## Deploy บน Coolify (Ubuntu)
+
+1. Push repo นี้ขึ้น GitHub
+2. ใน Coolify: **+ New Resource → Public/Private Repository (GitHub App)** → เลือก repo
+3. Build Pack เลือก **Docker Compose** (ใช้ `docker-compose.yml` ที่มีให้ — มีทั้ง app และ PostgreSQL พร้อม volume)
+4. แท็บ **Environment Variables** ตั้งค่าอย่างน้อย:
+
+   | ตัวแปร | ค่า |
+   | --- | --- |
+   | `POSTGRES_PASSWORD` | รหัสผ่านยาว ๆ แบบสุ่ม (**จำเป็น**) |
+   | `APP_URL` | เช่น `https://goals.yourdomain.com` |
+   | `ALLOW_REGISTRATION` | `false` หลังสมัครบัญชีตัวเองเสร็จ ถ้าไม่อยากให้คนอื่นสมัคร |
+   | `DISCORD_WEBHOOK_URL` | (ไม่บังคับ) สำหรับ Feedback |
+   | `NEXT_PUBLIC_BRAND_URL` | (ไม่บังคับ) ลิงก์ของเครดิต Zentyr ที่ footer |
+
+5. ตั้ง **Domain** ให้ service `app` (port `3000`) → Coolify จะออก SSL ให้อัตโนมัติ
+6. กด **Deploy** — ตาราง database จะถูกสร้างอัตโนมัติตอนแอปเริ่มทำงาน
+
+> **ทางเลือก:** ถ้าอยากให้ Coolify จัดการ PostgreSQL เอง (มีระบบ backup ในตัว) ให้สร้าง Database resource แยก
+> แล้ว deploy แอปด้วย Build Pack **Dockerfile** พร้อมตั้ง `DATABASE_URL` ชี้ไปที่ database นั้น
+
+### Backup
+
+- ถ้าใช้ Coolify Database resource: เปิด Scheduled Backups ในหน้า database ได้เลย
+- ถ้าใช้ `docker-compose.yml`: รัน `./scripts/backup.sh` บนเซิร์ฟเวอร์ (หรือตั้ง cron) จะได้ไฟล์ `.sql.gz` ใน `backups/`
+- หรือกด **ส่งออกข้อมูล (JSON)** ในเมนูบัญชีของแอป
+
+### ย้ายข้อมูลจาก Supabase เดิม
+
+ดู [`scripts/import-supabase.md`](scripts/import-supabase.md)
+
+## พัฒนาในเครื่อง
 
 ```bash
+cp .env.example .env.local          # แก้ DATABASE_URL ให้ชี้ไป Postgres ในเครื่อง
+docker run -d --name vg-db -p 5432:5432 -e POSTGRES_USER=vision -e POSTGRES_PASSWORD=change-me -e POSTGRES_DB=vision_goals postgres:16-alpine
 npm install
+npm run dev                          # http://localhost:3000 (migration รันให้อัตโนมัติ)
 ```
 
-### 2. Configure Supabase
-
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Run the SQL schema from `supabase-schema.sql` in the SQL Editor
-3. Enable Google OAuth in Authentication > Providers
-4. Copy your project URL and anon key
-
-### 3. Environment Variables
-
-Create a `.env.local` file:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-### 4. Run Development Server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000)
-
-## Deployment
-
-Deploy to Vercel:
-
-```bash
-vercel
-```
-
-Remember to add your environment variables in Vercel's project settings.
+| คำสั่ง | ใช้ทำอะไร |
+| --- | --- |
+| `npm run lint` / `npm run typecheck` | ตรวจโค้ด |
+| `npm run build` | build production |
+| `npm run db:generate` | สร้างไฟล์ migration ใหม่หลังแก้ `src/server/db/schema.ts` |
+| `npm run db:studio` | เปิด Drizzle Studio ดูข้อมูลในฐานข้อมูล |
 
 ## License
 
-MIT
+MIT © Zentyr

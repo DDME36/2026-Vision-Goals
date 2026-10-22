@@ -1,50 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { env } from '@/server/env'
+import { ApiError, json, readJson, route } from '@/server/http'
+import { clientIp, rateLimit } from '@/server/rate-limit'
+import { feedbackSchema } from '@/lib/validation'
+import { APP_NAME, BRAND } from '@/lib/config'
 
-export async function POST(request: NextRequest) {
-  try {
-    const { feedback } = await request.json()
+export const POST = route(async (request) => {
+  const webhookUrl = env.discordWebhookUrl
+  if (!webhookUrl) throw new ApiError(503, 'ระบบ Feedback ยังไม่ได้ตั้งค่า', 'NOT_CONFIGURED')
 
-    if (!feedback || typeof feedback !== 'string' || !feedback.trim()) {
-      return NextResponse.json(
-        { error: 'Feedback is required' },
-        { status: 400 }
-      )
-    }
+  const limit = rateLimit(`feedback:${clientIp(request)}`, 5, 10 * 60 * 1000)
+  if (!limit.ok) throw new ApiError(429, 'ส่งบ่อยเกินไป กรุณารอสักครู่', 'RATE_LIMITED')
 
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL
+  const { feedback } = await readJson(request, feedbackSchema)
 
-    if (!webhookUrl) {
-      console.warn('DISCORD_WEBHOOK_URL not configured')
-      return NextResponse.json(
-        { error: 'Feedback service not configured' },
-        { status: 503 }
-      )
-    }
-
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        embeds: [{
+  const response = await fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      allowed_mentions: { parse: [] },
+      embeds: [
+        {
           title: '💬 Feedback ใหม่',
           description: feedback,
-          color: 0x5865F2,
+          color: 0xea580c,
           timestamp: new Date().toISOString(),
-          footer: { text: '2026 Vision Board - Anonymous Feedback' }
-        }]
-      })
-    })
+          footer: { text: `${APP_NAME} by ${BRAND} · Anonymous` },
+        },
+      ],
+    }),
+  })
+  if (!response.ok) throw new Error(`Discord webhook failed: ${response.status}`)
 
-    if (!response.ok) {
-      throw new Error(`Discord webhook failed: ${response.status}`)
-    }
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Feedback API error:', error)
-    return NextResponse.json(
-      { error: 'Failed to send feedback' },
-      { status: 500 }
-    )
-  }
-}
+  return json({ ok: true })
+})

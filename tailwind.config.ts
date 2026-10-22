@@ -1,71 +1,55 @@
 import type { Config } from 'tailwindcss'
+import animate from 'tailwindcss-animate'
+
+const color = (name: string) => `hsl(var(--${name}) / <alpha-value>)`
 
 const config: Config = {
   darkMode: ['class'],
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+  content: ['./src/**/*.{ts,tsx}'],
   theme: {
+    container: {
+      center: true,
+      padding: { DEFAULT: '1rem', sm: '1.5rem' },
+      screens: { '2xl': '1280px' },
+    },
     extend: {
       fontFamily: {
-        sans: ['var(--font-sans)', 'sans-serif'],
-        display: ['var(--font-display)', 'cursive'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'var(--font-sans)', 'cursive'],
       },
       colors: {
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
-        },
-        primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
-        },
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        border: 'hsl(var(--border))',
-        ring: 'hsl(var(--ring))',
+        background: color('background'),
+        foreground: color('foreground'),
+        card: { DEFAULT: color('card'), foreground: color('card-foreground') },
+        popover: { DEFAULT: color('popover') },
+        primary: { DEFAULT: color('primary'), foreground: color('primary-foreground') },
+        secondary: { DEFAULT: color('secondary'), foreground: color('secondary-foreground') },
+        muted: { DEFAULT: color('muted'), foreground: color('muted-foreground') },
+        accent: { DEFAULT: color('accent'), foreground: color('accent-foreground') },
+        brand: { DEFAULT: color('brand'), foreground: color('brand-foreground') },
+        success: color('success'),
+        danger: color('danger'),
+        border: color('border'),
+        ring: color('ring'),
       },
       borderRadius: {
+        xl: 'calc(var(--radius) + 2px)',
         lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        md: 'calc(var(--radius) - 4px)',
+        sm: 'calc(var(--radius) - 6px)',
       },
       keyframes: {
-        'fade-in': {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        'scale-in': {
-          '0%': { transform: 'scale(0.95)', opacity: '0' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
-        },
-        'confetti-fall': {
-          '0%': { transform: 'translateY(-10px) rotate(0deg)', opacity: '1' },
-          '100%': { transform: 'translateY(100px) rotate(720deg)', opacity: '0' },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-8px)' },
         },
       },
       animation: {
-        'fade-in': 'fade-in 0.3s ease-out',
-        'scale-in': 'scale-in 0.2s ease-out',
-        'confetti-fall': 'confetti-fall 1s ease-out forwards',
+        float: 'float 4s ease-in-out infinite',
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [animate],
 }
 
 export default config
